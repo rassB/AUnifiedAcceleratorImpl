@@ -6,18 +6,34 @@
 //#include <hls_stream.h>
 #include <ap_fixed.h>
 
-
+// Systolic Array Sizing :
 #define mc 3 //columns of the Systolic Array
-#define mr 5 //rows of the Systolic Array               ALSO number of rows = number of channels ??
- // Impl doesn't return correct results when mr =/= mc ?? WHY ?
+#define mr 3 //rows of the Systolic Array
+/*TODO (SOLVED) Impl doesn't return correct results when mr =/= mc ?? WHY ? (Reasons and alternative solutions in comment)
+//Solutions: index by index output seems to return expected MAC operations;
+//Why output bad : In general, the output of std::cout is neither relevant nor a good VALUE debugging strategy,
+	//there seems to be a problem with COUT expecting specific types (obviously it does not use fixed point by default),
+	//if you still want to debug that way you should :
+		//use fixed point cout (that exists idk if the implementation of FxPoints in CPP would support Xilinx Formats),
+		//Can try read the indexes of the ouput matrixes this way:
+			//Array[height][width][depth][indexOfElementIwantToSee] to get the bit by bit output.
+
+	//OtherDebugging Strategies :
+		//some more explicit function that just outputs by IO buffer without touching anything.
+		//i should try sending in actual data (images?) and check the ouput.
+//Conclusion : mc and mr can be "arbitrary". */
+
+// Kernel Sizing :
 #define k 3 //Square kernel size (must be odd?)
 
 
-
-#define h 5 // height of the input // temporary making 10x10
-#define l 5 // length of the input
+// Input Sizing :
+#define h 3 // height of the input // temporary making 10x10
+#define l 3 // length of the input
 #define c 2 // channels of the input
 
+// Padding Strategy
+#define pad 2
 
 // TODO:to be defined with primitives only.
 #define kdepth 9 // number of elements inside each 3D kernel ?
@@ -27,11 +43,12 @@
 
 
 
-
+// Data Types :
 typedef ap_fixed<8,8> KerType; // 1 bit entier et 7 de virgule :) ==> will give you negative overflow // temporary making 8,8 for tests
 typedef ap_fixed<8,8> ImgType; // 8 entiers 8 vigule // temporary making it 16 16 for tests
 typedef ap_fixed<17,17> MidType; // 17 entiers 15 virgule :)
-
+// Zeros
+#define  ImgType_ZERO "0b00000000"
 // AND DONT CAST ANYTHING JUST LEARN TO COUNT!
 
 /*
