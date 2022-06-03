@@ -1,10 +1,11 @@
 #include "mult.h"
 #include <iostream>
+//#include <bitset>
 
 void macarray_c(KerType A[mr][k*k*c], ImgType B[k*k*c][mc])
 {
 
-
+	std::bitset<4> b3{"0011"};
 	MidType C[mr][mc],last,temp;
 
 	for(int t=0;t<k*k*c;t++)
@@ -16,6 +17,8 @@ void macarray_c(KerType A[mr][k*k*c], ImgType B[k*k*c][mc])
 				last = (t==0)? "0b00000000000000000000000000000000":C[i][j];
 				temp = A[i][t]*B[t][j];
 				C[i][j]= last+temp;
+				std::cout<< "Element C[" << i<<","<<j<<"]= A["<<i<<","<<t<<"]("<<A[i,t]<<")*B["<<t<<","<<j<<"]("<<B[t,j]<<")+ oldC["<<i<<","<<j<<"]= "<<C[i,j]<<std::endl;
+				//std::cout<< b3;
 			}
 		}
 	}
@@ -40,7 +43,7 @@ void fillarrays_c(KerType alpha[mr][k*k*c], ImgType beta[k*k*c][mc])
 		for(int j=0;j<k*k*c;j++)
 		{
 
-			alpha [i][j]=(i==mr-1 && j== k*k*c-1)? 1:0;
+			alpha [i][j]=(i==mr-1 && j== k*k*c-1)? 0b000000000000001:0b000000000000000;
 			std::cout<< alpha[i][j]<<' ';
 		}
 		std::cout <<std::endl;
@@ -137,7 +140,7 @@ void fillinputs_c(ImgType initial_input[c][h][l])
 void input_mapping_c(ImgType initial_input[c][h][l], ImgType flat_input[c*k*k][h*l])
 {
 //TODO out of bound junk has to be cleared, with data type options ? rounding and overflow ? VS detected and put to 0
-
+//TODO Padding
 
 
 	for (int icol = 0; icol < 3; ++icol)
@@ -179,12 +182,12 @@ void input_mapping_c(ImgType initial_input[c][h][l], ImgType flat_input[c*k*k][h
 
 int main()
 {
-/*test macarray
+/*test macarray*/
 	KerType A[mr][k*k*c];
 	ImgType B[k*k*c][mc];
 
-fillarrays(A,B);
-macarray_c(A,B);*/
+fillarrays_c(A,B);
+macarray_c(A,B);
 
 /* test kernel mapping
 
@@ -193,12 +196,12 @@ macarray_c(A,B);*/
 	fillkernels_c(A);
 	kernel_mapping_c(A, B); */
 
-/* test kernel mapping */
+/* test kernel mapping
 
 ImgType A[c][h][l];
 ImgType B[c*k*k][h*l];
 fillinputs_c(A);
-input_mapping_c(A,B);
+input_mapping_c(A,B); */
 
 
 return 0;

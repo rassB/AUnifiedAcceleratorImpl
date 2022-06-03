@@ -8,7 +8,7 @@
 
 
 #define mc 3 //columns of the Systolic Array
-#define mr 3 //rows of the Systolic Array               ALSO number of rows = number of channels ??
+#define mr 5 //rows of the Systolic Array               ALSO number of rows = number of channels ??
  // Impl doesn't return correct results when mr =/= mc ?? WHY ?
 #define k 3 //Square kernel size (must be odd?)
 
@@ -29,8 +29,8 @@
 
 
 typedef ap_fixed<8,8> KerType; // 1 bit entier et 7 de virgule :) ==> will give you negative overflow // temporary making 8,8 for tests
-typedef ap_fixed<16,16,AP_RND_INF,AP_SAT_ZERO> ImgType; // 8 entiers 8 vigule // temporary making it 16 16 for tests
-typedef ap_fixed<32,17> MidType; // 17 entiers 15 virgule :)
+typedef ap_fixed<8,8> ImgType; // 8 entiers 8 vigule // temporary making it 16 16 for tests
+typedef ap_fixed<17,17> MidType; // 17 entiers 15 virgule :)
 
 // AND DONT CAST ANYTHING JUST LEARN TO COUNT!
 
