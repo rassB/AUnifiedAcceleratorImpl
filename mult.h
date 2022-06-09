@@ -48,7 +48,7 @@ typedef ap_fixed<8,8> KerType; // 1 bit entier et 7 de virgule :) ==> will give 
 typedef ap_fixed<8,8> ImgType; // 8 entiers 8 vigule // temporary making it 16 16 for tests
 typedef ap_fixed<17,17> MidType; // 17 entiers 15 virgule :)
 // Zeros
-#define  ImgType_ZERO "0b00000000"
+#define  ImgType_ZERO "0b00100100"
 // AND DONT CAST ANYTHING JUST LEARN TO COUNT!
 
 /*

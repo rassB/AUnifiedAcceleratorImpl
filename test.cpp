@@ -140,8 +140,11 @@ void fillinputs_c(ImgType initial_input[c][h][l])
 
 void input_mapping_c(ImgType initial_input[c][h][l], ImgType flat_input[c*k*k][h*l])
 {
-//TODO out of bound junk has to be cleared, with data type options ? rounding and overflow ? VS detected and put to 0
-//TODO Padding
+//TODO (Solved) out of bound junk has to be cleared, with data type options ? rounding and overflow ? VS detected and put to 0
+	/* Done, Not very elegant but iterators are too important to be touched,
+	 * more logic is needed to handle the out of bound cases without accessing prohibited memory on the board.
+	 */
+//TODO Padding (Do I need any more padding than that ? am not convinced since my logic implments 0s where out of bound.
 
 
 	for (int icol = 0; icol < h*l; ++icol)
@@ -154,20 +157,56 @@ void input_mapping_c(ImgType initial_input[c][h][l], ImgType flat_input[c*k*k][h
 				for (int x = 0; x < k; ++x)
 				{
 					//(x+icol > l*h)? flat_input[kernel_channel_count][icol]= ImgType_ZERO :flat_input[kernel_channel_count][icol] = initial_input[i][j][x+icol];
-					flat_input[kernel_channel_count][icol] = initial_input[i][j][x+icol];
+
 
 					//Sanity Check ?
-					if (i>c || j>h || x+icol>l )
+//TODO write this sanity check in a more elegant way; that would avoid writing if it's to overwrite just after.
+					if (!(x+icol<l))
 					{
 						std::cout <<"non-existing input element ["
 								  <<i<<","<<j<<","<< x+icol
 								  <<"] value="<< initial_input[i][j][x+icol]
-						          <<" is being put in flat["
-								  << kernel_channel_count<<","<<x+icol<<']'
+                                  <<" is being replaced by["
+								  << i <<","<<j+1<<","<<(x+icol)-l
+								  <<"] value="<< initial_input[i][j+1][(x+icol)-l]
+                                  <<" is being put in flat["
+								  << kernel_channel_count<<","<<icol<<']'
 								  <<std::endl;
-
+						flat_input[kernel_channel_count][icol] = initial_input[i][j+1][x+icol-l];
+						if(!(j+1<h))
+						{
+							std::cout <<" INNER SANITY :non-existing input element ["
+									  <<i<<","<<j+1<<","<< x+icol-l
+									  <<"] value="<< initial_input[i][j+1][x+icol-l]
+	                                  <<" is being replaced by["
+									  << i+1 <<","<<j+1-h<<","<<(x+icol)-l
+									  <<"] value="<< initial_input[i+1][j+1-h][(x+icol)-l]
+	                                  <<" is being put in flat["
+									  << kernel_channel_count<<","<<icol<<']'
+									  <<std::endl;
+							flat_input[kernel_channel_count][icol] = initial_input[i+1][j+1-h][x+icol-l];
+							if(!(i+1<c))
+							{
+								std::cout <<"   INNER SANITY :non-existing input element ["
+										  <<i+1<<","<<j+1-h<<","<< x+icol-l
+										  <<"] value="<< initial_input[i+1][j+1-h][x+icol-l]
+		                                  <<" is being replaced by["
+										  << ImgType_ZERO
+										  <<"] value="<< ImgType_ZERO
+		                                  <<" is being put in flat["
+										  << kernel_channel_count<<","<<icol<<']'
+										  <<std::endl;
+								flat_input[kernel_channel_count][icol] = ImgType_ZERO;
+							}
+						}
 					}
-					else std::cout<<"normal"<<std::endl;
+
+
+					else {
+						std::cout<<"normal"<<std::endl;
+
+						flat_input[kernel_channel_count][icol] = initial_input[i][j][x+icol];}
+
 					//Element Corresp Check
 					//std::cout << "element Of flat input :[" << kernel_channel_count << ","<<icol << "] "<< "corresponds to element of initial input:["<< i <<","<<j<<"," <<x+icol<<"] and is equal to: "<< flat_input[kernel_channel_count][icol] <<std::endl;
 
