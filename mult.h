@@ -45,7 +45,7 @@
 
 // Data Types :
 typedef ap_fixed<8,8> KerType; // 1 bit entier et 7 de virgule :) ==> will give you negative overflow // temporary making 8,8 for tests
-typedef ap_fixed<9,9> ImgType; // 8 entiers 8 vigule // temporary making it 16 16 for tests
+typedef ap_fixed<16,16> ImgType; // 8 entiers 8 vigule // temporary making it 16 16 for tests
 typedef ap_fixed<17,17> MidType; // 17 entiers 15 virgule :)
 // Zeros
 #define  ImgType_ZERO "0b000000000"

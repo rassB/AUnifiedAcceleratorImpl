@@ -261,8 +261,8 @@ void altinput_mapping_naive_c(ImgType initial_input[c][h][l], ImgType flat_input
 {
 
 	/*ToDO: Add Padding, size of flat input should be flatinput[c*k*k][mc+2pad], this flat input is going to be used as input for macarray
-	 *
-	 *
+	 * Not working correctly for h l 28 28, because for (int x = 0; x < mc; ++x) is limitng to MC elements ?
+	 * Not fetching more lines Yet.
 	 */
 	int count=0;
 
