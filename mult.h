@@ -28,8 +28,8 @@
 
 
 // Input Sizing :
-#define h 3 // height of the input // temporary making 10x10
-#define l 3 // length of the input
+#define h 5 // height of the input // temporary making 10x10
+#define l 5 // length of the input
 #define c 2 // channels of the input
 
 // Padding Strategy
@@ -45,10 +45,10 @@
 
 // Data Types :
 typedef ap_fixed<8,8> KerType; // 1 bit entier et 7 de virgule :) ==> will give you negative overflow // temporary making 8,8 for tests
-typedef ap_fixed<8,8> ImgType; // 8 entiers 8 vigule // temporary making it 16 16 for tests
+typedef ap_fixed<9,9> ImgType; // 8 entiers 8 vigule // temporary making it 16 16 for tests
 typedef ap_fixed<17,17> MidType; // 17 entiers 15 virgule :)
 // Zeros
-#define  ImgType_ZERO "0b00100100"
+#define  ImgType_ZERO "0b000000000"
 // AND DONT CAST ANYTHING JUST LEARN TO COUNT!
 
 /*
@@ -76,7 +76,11 @@ void fillinputs_c(ImgType initial_input[c][h][l]);
 
 
 void kernel_mapping_c(KerType initial_kernel[mr][c][k][k],KerType flat_kernel[mr][c*k*k]); //64 ×3 kernels with a size of 3 ×3 are mapped to a rearranged matrix with dimensions of 64 ×(3 ×3 ×3).  they use 64 mc in their impl.
-void input_mapping_c(ImgType initial_input[c][h][l], ImgType flat_input[c*k*k][h*l]); //all three input features with dimensions of 32 ×32 are mapped to a rearranged matrix with dimensions of (3 ×3 ×3) ×(32 ×32).
+void input_mapping_naive_c(ImgType initial_input[c][h][l], ImgType flat_input[c*k*k][h*l]); //all three input features with dimensions of 32 ×32 are mapped to a rearranged matrix with dimensions of (3 ×3 ×3) ×(32 ×32).
+
+
+
+void altinput_mapping_naive_c(ImgType initial_input[c][h][l], ImgType flat_input[c*k*k][mc]);
 
 // to do output ??
 

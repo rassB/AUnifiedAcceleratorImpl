@@ -2,13 +2,13 @@
 #include <iostream>
 //#include <bitset>
 
-void macarray_c(KerType A[mr][k*k*c], ImgType B[k*k*c][mc])
+void macarray_c(KerType A[mr][c*k*k], ImgType B[c*k*k][mc])
 {
 
 	//std::bitset<4> b3{"0011"};
 	MidType C[mr][mc],last,temp;
 
-	for(int t=0;t<k*k*c;t++)
+	for(int t=0;t<c*k*k;t++)
 	{
 		for(int i=0; i<mr; i++)
 		{
@@ -36,7 +36,7 @@ void macarray_c(KerType A[mr][k*k*c], ImgType B[k*k*c][mc])
 
 
 }
-void fillarrays_c(KerType alpha[mr][k*k*c], ImgType beta[k*k*c][mc])
+void fillarrays_c(KerType alpha[mr][k*k*c], ImgType beta[c*k*k][mc])
 
 {
 	for (int i=0;i<mr;i++)
@@ -136,16 +136,17 @@ void fillinputs_c(ImgType initial_input[c][h][l])
 
 
 
+// initial input comes as a stream, to be decided.
+// input mapping takes initial input and converts it to flat input
 
+void input_mapping_naive_c(ImgType initial_input[c][h][l], ImgType flat_input[c*k*k][h*l])
 
-void input_mapping_c(ImgType initial_input[c][h][l], ImgType flat_input[c*k*k][h*l])
 {
 //TODO (Solved) out of bound junk has to be cleared, with data type options ? rounding and overflow ? VS detected and put to 0
-	/* Done, Not very elegant but iterators are too important to be touched,
+	/* Done, Not very elegant but shifterators are too important to be touched,
 	 * more logic is needed to handle the out of bound cases without accessing prohibited memory on the board.
 	 */
 //TODO Padding (Do I need any more padding than that ? am not convinced since my logic implments 0s where out of bound.
-
 
 	for (int icol = 0; icol < h*l; ++icol)
 	{
@@ -255,6 +256,51 @@ Enough Internet for today
 
 
 
+
+void altinput_mapping_naive_c(ImgType initial_input[c][h][l], ImgType flat_input[c*k*k][mc])
+{
+
+	/*ToDO: Add Padding, size of flat input should be flatinput[c*k*k][mc+2pad], this flat input is going to be used as input for macarray
+	 *
+	 *
+	 */
+	int count=0;
+
+		for (int i = 0; i < c; ++i)
+			{
+				for (int j = 0; j < k; ++j)
+					{
+							for (int shifter = 0; shifter < k; ++shifter)
+								{
+									for (int x = 0; x < mc; ++x)
+										{
+											flat_input[count][x]=initial_input[i][j][x+shifter];
+									//	std::cout<<"Initial:["<<i<<","<<j<<","<<x+shifter<<"]Value:"<<initial_input[i][j][x+shifter]<<" Goes to Flat:["<<count<<","<<x<<"]Value:"<<flat_input[count][x]<<std::endl;
+
+										}
+									count++;
+								}
+					}
+			}
+
+
+
+
+
+
+	//print flattened array
+		for (int ii = 0; ii < c*k*k; ++ii)
+		{
+			for (int jj = 0; jj < mc; ++jj)
+			{
+				std::cout << flat_input[ii][jj] << " ";
+			}
+			std::cout << std::endl;
+		}
+
+
+}
+
 int main()
 {
 /*test macarray
@@ -271,15 +317,24 @@ macarray_c(A,B);*/
 	fillkernels_c(A);
 	kernel_mapping_c(A, B); */
 
-/* test kernel mapping*/
+/* test kernel mapping
 
 ImgType A[c][h][l];
 ImgType B[c*k*k][h*l];
+
 fillinputs_c(A);
-input_mapping_c(A,B);
+
+input_mapping_naive_c(A,B);*/
+
+ImgType A[c][h][l];
+ImgType B[c*k*k][mc];
+
+fillinputs_c(A);
+altinput_mapping_naive_c(A, B);
 
 
 return 0;
+
 }
 
 
