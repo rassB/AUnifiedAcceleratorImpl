@@ -257,24 +257,25 @@ Enough Internet for today
 
 
 
-void altinput_mapping_naive_c(ImgType initial_input[c][h][l], ImgType flat_input[c*k*k][mc])
+void altinput_mapping_naive_c(ImgType initial_input[c][h][l], ImgType flat_input[c*h*k][l])
 {
 
 	/*ToDO: Add Padding, size of flat input should be flatinput[c*k*k][mc+2pad], this flat input is going to be used as input for macarray
 	 * Not working correctly for h l 28 28, because for (int x = 0; x < mc; ++x) is limitng to MC elements ?
-	 * Not fetching more lines Yet.
+	 * Not fetching more lines Yet. (fetching lines is done at top level).
 	 */
 	int count=0;
 
 		for (int i = 0; i < c; ++i)
 			{
-				for (int j = 0; j < k; ++j)
+				for (int j = 0; j < h; ++j)
 					{
-							for (int shifter = 0; shifter < k; ++shifter)
+							for (int shifter = 0; shifter < k; ++shifter) //shift more than k times ?
 								{
-									for (int x = 0; x < mc; ++x)
+									for (int x = 0; x < l; ++x)
 										{
-											flat_input[count][x]=initial_input[i][j][x+shifter];
+										(!(x+shifter<l))?flat_input[count][x]=ImgType_ZERO:flat_input[count][x]=initial_input[i][j][x+shifter];
+
 									//	std::cout<<"Initial:["<<i<<","<<j<<","<<x+shifter<<"]Value:"<<initial_input[i][j][x+shifter]<<" Goes to Flat:["<<count<<","<<x<<"]Value:"<<flat_input[count][x]<<std::endl;
 
 										}
@@ -283,6 +284,52 @@ void altinput_mapping_naive_c(ImgType initial_input[c][h][l], ImgType flat_input
 					}
 			}
 
+
+
+
+
+
+	//print flattened array
+		for (int ii = 0; ii < c*h*k; ++ii)
+		{
+			for (int jj = 0; jj < l; ++jj)
+			{
+				std::cout << flat_input[ii][jj] << " ";
+			}
+			std::cout << std::endl;
+		}
+
+
+}
+
+
+void matrix_mapping(ImgType initial_input[c][h][l], ImgType flat_input[c*k*k][mc+2*pad])
+	{
+
+	/*ToDO: Add Padding, size of flat input should be flatinput[c*k*k][mc+2pad], this flat input is going to be used as input for macarray
+	 //SOLVED : Working Fine, always has been, limiting to MC elements is by design. Not working correctly for h l 28 28, because for (int x = 0; x < mc; ++x) is limitng to MC elements ?
+	 * Not fetching more lines Yet. (fetching lines is done at top level).
+	 */
+
+	int count=0;
+
+		for (int i = 0; i < c; ++i)
+			{
+				for (int j = 0; j < k; ++j)
+					{
+							for (int shifter = 0; shifter < k; ++shifter) //shift more than k times ?
+								{
+									for (int x = 0; x < mc; ++x)
+										{
+										(!(x+shifter<mc))?flat_input[count][x]=ImgType_ZERO:flat_input[count][x]=initial_input[i][j][x+shifter];
+
+
+
+										}
+									count++;
+								}
+					}
+			}
 
 
 
@@ -298,8 +345,52 @@ void altinput_mapping_naive_c(ImgType initial_input[c][h][l], ImgType flat_input
 			std::cout << std::endl;
 		}
 
+	}
 
-}
+
+
+void Convolution(ImgType initial_input[c][h][l])
+{
+
+Border:for (int i = 0; i < height; i++)
+	{
+        for (int j = 0; j < width; j++)
+
+
+            if (i == 0 || (i > border_width && i < height - border_width))
+            {
+                // read a pixel out of the input stream and cache it for
+                // immediate use and later replication purposes
+                if (j < width - (K - 1))
+                {
+                    pix_in = vconv.read();
+                    borderbuf[j] = pix_in;
+                }
+                if (j == 0) {
+                    l_edge_pix = pix_in;
+                }
+                if (j == width - K)
+                {
+                    r_edge_pix = pix_in;
+                }
+            }
+            // Select output value from the appropriate cache resource
+            if (j <= border_width)
+            {
+                pix_out = l_edge_pix;
+            }
+            else if (j >= width - border_width - 1)
+            {
+                pix_out = r_edge_pix;
+            }
+            else
+            {
+                pix_out = borderbuf[j - border_width];
+            }
+        }
+	}
+
+
 
 int main()
 {
@@ -326,12 +417,17 @@ fillinputs_c(A);
 
 input_mapping_naive_c(A,B);*/
 
+/*
 ImgType A[c][h][l];
-ImgType B[c*k*k][mc];
+ImgType B[c*h*k][l];
 
 fillinputs_c(A);
-altinput_mapping_naive_c(A, B);
+altinput_mapping_naive_c(A, B);*/
 
+	ImgType A[c][h][l];
+	ImgType B[c*k*k][mc+2*pad];
+	fillinputs_c(A);
+	matrix_mapping(A,B);
 
 return 0;
 

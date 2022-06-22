@@ -7,7 +7,7 @@
 #include <ap_fixed.h>
 
 // Systolic Array Sizing :
-#define mc 3 //columns of the Systolic Array
+#define mc 5 //columns of the Systolic Array
 #define mr 3 //rows of the Systolic Array
 /*TODO (SOLVED) Impl doesn't return correct results when mr =/= mc ?? WHY ? (Reasons and alternative solutions in comment)
 //Solutions: index by index output seems to return expected MAC operations;
@@ -28,16 +28,16 @@
 
 
 // Input Sizing :
-#define h 5 // height of the input // temporary making 10x10
-#define l 5 // length of the input
+#define h 28 // height of the input // temporary making 10x10
+#define l 28 // length of the input
 #define c 2 // channels of the input
 
 // Padding Strategy
-#define pad 2
+#define pad 0
 
 // TODO:to be defined with primitives only.
 #define kdepth 9 // number of elements inside each 3D kernel ?
-#define idepth h*l //
+#define idepth c*k*k //
 #define odepth //
 
 
@@ -61,7 +61,7 @@ typedef int32_t MidType;
 //Impl
 void macarray(KerType A[mr][k*k*c],ImgType B[k*k*c][mc]);
 void fillarrays(KerType alpha[mr][k*k*c], ImgType beta[k*k*c][mc]);
-void mapping();
+void matrix_mapping(ImgType[c][h][l],ImgType[c*k*k][mc+2*pad]);
 
 
 
@@ -79,8 +79,9 @@ void kernel_mapping_c(KerType initial_kernel[mr][c][k][k],KerType flat_kernel[mr
 void input_mapping_naive_c(ImgType initial_input[c][h][l], ImgType flat_input[c*k*k][h*l]); //all three input features with dimensions of 32 ×32 are mapped to a rearranged matrix with dimensions of (3 ×3 ×3) ×(32 ×32).
 
 
+void altinput_mapping_naive_c(ImgType initial_input[c][h][l], ImgType flat_input[c*h*k][l]);
 
-void altinput_mapping_naive_c(ImgType initial_input[c][h][l], ImgType flat_input[c*k*k][mc]);
+
 
 // to do output ??
 
