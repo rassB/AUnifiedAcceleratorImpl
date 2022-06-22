@@ -2,11 +2,11 @@
 #include <iostream>
 //#include <bitset>
 
-void macarray_c(KerType A[mr][c*k*k], ImgType B[c*k*k][mc])
+void macarray_c(KerType A[mr][c*k*k], ImgType B[c*k*k][mc],MidType C[mr][mc])
 {
 
 	//std::bitset<4> b3{"0011"};
-	MidType C[mr][mc],last,temp;
+	MidType last,temp;
 
 	for(int t=0;t<c*k*k;t++)
 	{
@@ -14,10 +14,10 @@ void macarray_c(KerType A[mr][c*k*k], ImgType B[c*k*k][mc])
 		{
 			for(int j=0; j<mc; j++)
 			{
-				last = (t==0)? "0b00000000000000000000000000000000":C[i][j];
+				last = (t==0)? MidType_ZERO:C[i][j];
 				temp = A[i][t]*B[t][j];
 				C[i][j]= last+temp;
-				std::cout<< "Element C[" << i<<","<<j<<"]= A["<<i<<","<<t<<"]("<<A[i,t]<<")*B["<<t<<","<<j<<"]("<<B[t,j]<<")+ oldC["<<i<<","<<j<<"]= "<<C[i,j]<<std::endl;
+				std::cout<< "Element C[" << i<<","<<j<<"]= A["<<i<<","<<t<<"]("<<A[i][t]<<")*B["<<t<<","<<j<<"]("<<B[t][j]<<")+ oldC["<<i<<","<<j<<"]"<< last<<"= "<<C[i][j]<<std::endl;
 				//std::cout<< b3;
 				//NOTE The outputting problem seems to be that cout doesn't consider my fixed points "correctly".
 			}
@@ -25,11 +25,11 @@ void macarray_c(KerType A[mr][c*k*k], ImgType B[c*k*k][mc])
 	}
 
 
-	for (int i=0;i<mc;i++)
+	for (int dii=0; dii<mr; dii++)
 	{
-		for(int j=0;j<mr;j++)
+		for(int djj=0; djj<mc; djj++)
 		{
-			std::cout<< C[i][j]<<' ';
+			std::cout<< C[dii][djj]<<' ';
 		}
 		std::cout<< std::endl;
 	}
@@ -72,45 +72,64 @@ void fillkernels_c(KerType alpha[mr][c][k][k])
 
 	for (int i = 0; i < mr; ++i)
 	{
-		std::cout<<"Index of Kernel mr: "<< i<< std::endl;
 		for (int j = 0; j < c; ++j)
 		{
-			std::cout<<"Channel c: "<<j <<" of kernel mr: "<< i<<std::endl;
 			for (int x = 0; x < k; ++x)
 			{
 				for (int y = 0; y < k; ++y)
 				{
 					alpha[i][j][x][y]= completed++;
-					std::cout<< alpha[i][j][x][y]<<' ';
 				}
-				std::cout<< std::endl;
 			}
-			std::cout<< std::endl;
 		}
-		std::cout<< std::endl;
 	}
+	for (int ii = 0; ii < mr; ++ii)
+	{
+		for (int jj = 0; jj < c; ++jj)
+		{
+			for (int xx = 0; xx < k; ++xx)
+			{
+				for (int yy = 0; yy < k; ++yy)
+				{
+					std::cout<< alpha[ii][jj][xx][yy]<<" ";
+				}
+				std::cout<<std::endl;
+			}
+			std::cout<<std::endl;
+		}
+		std::cout<<std::endl;
+	}
+
 }
 void kernel_mapping_c(KerType initial_kernel[mr][c][k][k],KerType flat_kernel[mr][c*k*k])
 {
 	//64 ×3 kernels with a size of 3 ×3 are mapped to a rearranged matrix with dimensions of 64 ×(3 ×3 ×3).  (they use 64 mc in their impl.)
 	//void kernel_mapping_c(KerType initial_kernel[mr][c][k][k],KerType flat_kernel[mr][c*k*k]);
-	int counter=0;
+	int mr_counter =0;
 
 	for (int i = 0; i < mr; ++i)
 	{
+		mr_counter =0;
 		for (int j = 0; j < c; ++j)
 		{
 			for (int x = 0; x < k; ++x)
 			{
 				for (int y = 0; y < k; ++y)
 				{
-					counter++; //return value before increment
-					flat_kernel[i][counter]=initial_kernel[i][j][x][y];
-					std::cout<< flat_kernel[i][counter]<<' ';
+					flat_kernel[i][mr_counter]=initial_kernel[i][j][x][y];
+					mr_counter++;
 				}
 			}
 		}
-		std::cout<< std::endl;
+	}
+
+	for (int ii = 0; ii < mr; ++ii)
+	{
+		for (int jj = 0; jj < c*k*k; ++jj)
+		{
+			std::cout<<flat_kernel[ii][jj]<< " ";
+		}
+		std::cout<<std::endl;
 	}
 
 }
@@ -303,7 +322,7 @@ void altinput_mapping_naive_c(ImgType initial_input[c][h][l], ImgType flat_input
 }
 
 
-void matrix_mapping(ImgType initial_input[c][h][l], ImgType flat_input[c*k*k][mc+2*pad])
+void static_matrix_mapping(ImgType initial_input[c][h][l], ImgType flat_input[c*k*k][mc+2*pad])
 	{
 
 	/*ToDO: Add Padding, size of flat input should be flatinput[c*k*k][mc+2pad], this flat input is going to be used as input for macarray
@@ -332,27 +351,30 @@ void matrix_mapping(ImgType initial_input[c][h][l], ImgType flat_input[c*k*k][mc
 			}
 
 
+		//print flattened array
+				for (int ii = 0; ii < c*k*k; ++ii)
+				{
+					for (int jj = 0; jj < mc; ++jj)
+					{
+						std::cout << flat_input[ii][jj] << " ";
+					}
+					std::cout << std::endl;
+				}
 
 
-
-	//print flattened array
-		for (int ii = 0; ii < c*k*k; ++ii)
-		{
-			for (int jj = 0; jj < mc; ++jj)
-			{
-				std::cout << flat_input[ii][jj] << " ";
-			}
-			std::cout << std::endl;
-		}
 
 	}
 
 
 
-void Convolution(ImgType initial_input[c][h][l])
+
+
+
+/*
+void padding(ImgType initial_input[c][h][l])
 {
 
-Border:for (int i = 0; i < height; i++)
+for (int i = 0; i < height; i++)
 	{
         for (int j = 0; j < width; j++)
 
@@ -389,7 +411,7 @@ Border:for (int i = 0; i < height; i++)
             }
         }
 	}
-
+*/
 
 
 int main()
@@ -424,10 +446,23 @@ ImgType B[c*h*k][l];
 fillinputs_c(A);
 altinput_mapping_naive_c(A, B);*/
 
-	ImgType A[c][h][l];
-	ImgType B[c*k*k][mc+2*pad];
+ImgType A[c][h][l], B[c*k*k][mc];
+KerType alpha[mr][c][k][k], ker[mr][k*k*c];
+MidType out[mr][mc];
+
 	fillinputs_c(A);
-	matrix_mapping(A,B);
+	static_matrix_mapping(A,B);
+
+
+
+
+
+fillkernels_c(alpha);
+kernel_mapping_c(alpha, ker);
+macarray_c(ker,B,out);
+
+
+
 
 return 0;
 

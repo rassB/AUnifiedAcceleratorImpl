@@ -7,7 +7,7 @@
 #include <ap_fixed.h>
 
 // Systolic Array Sizing :
-#define mc 5 //columns of the Systolic Array
+#define mc 8 //columns of the Systolic Array
 #define mr 3 //rows of the Systolic Array
 /*TODO (SOLVED) Impl doesn't return correct results when mr =/= mc ?? WHY ? (Reasons and alternative solutions in comment)
 //Solutions: index by index output seems to return expected MAC operations;
@@ -46,9 +46,10 @@
 // Data Types :
 typedef ap_fixed<8,8> KerType; // 1 bit entier et 7 de virgule :) ==> will give you negative overflow // temporary making 8,8 for tests
 typedef ap_fixed<16,16> ImgType; // 8 entiers 8 vigule // temporary making it 16 16 for tests
-typedef ap_fixed<17,17> MidType; // 17 entiers 15 virgule :)
+typedef ap_fixed<64,64> MidType; // 17 entiers 15 virgule :)
 // Zeros
-#define  ImgType_ZERO "0b000000000"
+#define  ImgType_ZERO "0b0000000000000000"
+#define MidType_ZERO "0b0000000000000000000000000000000000000000000000000000000000000000"
 // AND DONT CAST ANYTHING JUST LEARN TO COUNT!
 
 /*
@@ -59,9 +60,9 @@ typedef int32_t MidType;
 
 
 //Impl
-void macarray(KerType A[mr][k*k*c],ImgType B[k*k*c][mc]);
+void macarray(KerType A[mr][k*k*c],ImgType B[k*k*c][mc], ImgType C[mr][mc]);
 void fillarrays(KerType alpha[mr][k*k*c], ImgType beta[k*k*c][mc]);
-void matrix_mapping(ImgType[c][h][l],ImgType[c*k*k][mc+2*pad]);
+
 
 
 
@@ -80,7 +81,8 @@ void input_mapping_naive_c(ImgType initial_input[c][h][l], ImgType flat_input[c*
 
 
 void altinput_mapping_naive_c(ImgType initial_input[c][h][l], ImgType flat_input[c*h*k][l]);
-
+void static_matrix_mapping(ImgType[c][h][l],ImgType[c*k*k][mc+2*pad]);
+void padding();
 
 
 // to do output ??
