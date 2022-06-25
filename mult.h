@@ -45,12 +45,12 @@
 #define tc (h*l)/mc  */
 
 
-const int mc = 8, mr = 3, k=3, h=28, l=28, c=2, pad=0;
+const int mc = 8, mr = 3, k=3, h=28, l=28, c=2, pad=0,MAX_CHANNELS=10;
 
 
 // Data Types :
 typedef ap_fixed<8,8> KerType; // 1 bit entier et 7 de virgule :) ==> will give you negative overflow // temporary making 8,8 for tests
-typedef ap_fixed<16,16> ImgType; // 8 entiers 8 vigule // temporary making it 16 16 for tests
+typedef ap_fixed<8,8> ImgType; // 8 entiers 8 vigule // temporary making it 16 16 for tests
 typedef ap_fixed<64,64> MidType; // 17 entiers 15 virgule :)
 // Zeros
 #define  ImgType_ZERO "0b0000000000000000"

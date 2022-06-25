@@ -8,7 +8,8 @@
 #include <sstream>
 #include "common/xf_sw_utils.hpp"
 #include "opencv2/opencv.hpp"
-
+#include <common/xf_structs.hpp>
+#include "imgproc/xf_channel_extract.hpp"
 //#include <bitset>
 
 void macarray_c(KerType A[mr][c*k*k], ImgType B[c*k*k][mc],MidType C[mr][mc])
@@ -441,7 +442,9 @@ for (int i = 0; i < height; i++)
 */
 
 
-
+void acquire()
+{
+	}
 
 
 int main()
@@ -492,11 +495,44 @@ kernel_mapping_c(alpha, ker);
 macarray_c(ker,B,out);
 */
 
-	cv::Mat  img = cv::imread("/home/rass/AUnifiedAcceleratorImpl/dataset/Lenna.bmp",1);
-	xf::cv::Mat
-	std::cout << img.channels() << " ";
+	cv::Mat  img = cv::imread("/home/rass/AUnifiedAcceleratorImpl/dataset/50x50.bmp",1);
+	cv::Mat ch[img.channels()];
 
-	cv::imwrite("/home/rass/AUnifiedAcceleratorImpl/dataset/Hi.png",img);
+	for (int i = 0; i < img.channels(); ++i)
+	{
+		cv::extractChannel(img, ch[i], i);
+	}
+
+
+
+
+
+	xf::cv::Mat<XF_8UC3,50,50,XF_NPPC1> array;
+	xf::cv::Mat<XF_8UC1,50,50,XF_NPPC1>channels[array.channels()];
+	array.copyTo(img.data);
+
+	for (int chh = 0; chh < array.channels(); ++chh)
+	{
+		xf::cv::extractChannel(array, channels[chh], chh);
+	}
+
+
+for (int var = 0; var < array.channels(); ++var)
+{
+
+
+	for (int i = 0; i < 50; ++i)
+	{
+		for (int j = 0; j < 50; ++j)
+		{
+			std::cout << ImgType(unsigned(channels[var].read(j+i*50))) << " ";
+		}
+		std::cout << std::endl;
+	}
+	std::cout << std::endl;
+
+}
+
 
 return 0;
 
