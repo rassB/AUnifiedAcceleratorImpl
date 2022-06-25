@@ -1,35 +1,5 @@
 #include "mult.h"
 
-
-
-
-
-/*
-void fillarrays(KerType alpha[mr][k*k*c], ImgType beta[k*k*c][mc])
-
-{
-	for (int i=0;i<mr;i++)
-	{
-		for(int j=0;j<k*k*c;j++)
-		{
-			alpha [i][j]=(i==mr-1 && j== k*k*c-1)? 1:0;
-		}
-	}
-
-
-
-	for (int i=0;i<k*k*c;i++)
-	{
-		for(int j=0;j<mc;j++)
-		{
-
-			beta [i][j]=(i==(k*k*c)-1 && j== mc-1)? 1:0;
-		}
-
-	}
-
-}*/
-
 void macarray(KerType A[mr][k*k*c], ImgType B[k*k*c][mc],MidType C[mr][mc])
 {
 

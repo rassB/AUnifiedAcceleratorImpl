@@ -1,9 +1,20 @@
 #include "mult.h"
 #include <iostream>
+
+#include <common/xf_common.hpp>
+#include <common/xf_headers.hpp>
+#include <common/xf_utility.hpp>
+#include <opencv2/core.hpp>
+#include <sstream>
+#include "common/xf_sw_utils.hpp"
+#include "opencv2/opencv.hpp"
+
 //#include <bitset>
 
 void macarray_c(KerType A[mr][c*k*k], ImgType B[c*k*k][mc],MidType C[mr][mc])
 {
+
+
 
 	//std::bitset<4> b3{"0011"};
 	MidType last,temp;
@@ -322,7 +333,10 @@ void altinput_mapping_naive_c(ImgType initial_input[c][h][l], ImgType flat_input
 }
 
 
-void static_matrix_mapping(ImgType initial_input[c][h][l], ImgType flat_input[c*k*k][mc+2*pad])
+
+
+
+void partial_matrix_mapping(ImgType initial_input[c][h][l], ImgType flat_input[c*k*k][mc+2*pad])
 	{
 
 	/*ToDO: Add Padding, size of flat input should be flatinput[c*k*k][mc+2pad], this flat input is going to be used as input for macarray
@@ -354,7 +368,7 @@ void static_matrix_mapping(ImgType initial_input[c][h][l], ImgType flat_input[c*
 		//print flattened array
 				for (int ii = 0; ii < c*k*k; ++ii)
 				{
-					for (int jj = 0; jj < mc; ++jj)
+					for (int jj = 0; jj < mc+2*pad; ++jj)
 					{
 						std::cout << flat_input[ii][jj] << " ";
 					}
@@ -366,7 +380,20 @@ void static_matrix_mapping(ImgType initial_input[c][h][l], ImgType flat_input[c*
 	}
 
 
+void conv_layer(ImgType ibuf[c*k*k][mc+2*pad], KerType kbuf[mr][c*k*k],MidType obuf[mr][mc])
+		{
 
+	// Load Kernels
+
+	// Acquire Image element
+	// for a block
+	// map block
+	// convolve block
+	// store block
+
+
+
+		}
 
 
 
@@ -414,6 +441,9 @@ for (int i = 0; i < height; i++)
 */
 
 
+
+
+
 int main()
 {
 /*test macarray
@@ -437,32 +467,36 @@ ImgType B[c*k*k][h*l];
 
 fillinputs_c(A);
 
-input_mapping_naive_c(A,B);*/
+input_mapping_naive_c(A,B);
 
-/*
 ImgType A[c][h][l];
 ImgType B[c*h*k][l];
 
 fillinputs_c(A);
-altinput_mapping_naive_c(A, B);*/
-
-ImgType A[c][h][l], B[c*k*k][mc];
+altinput_mapping_naive_c(A, B);
+*/
+/*
+ImgType A[c][h][l], B[c*k*k][mc+2*pad];
 KerType alpha[mr][c][k][k], ker[mr][k*k*c];
 MidType out[mr][mc];
 
 	fillinputs_c(A);
-	static_matrix_mapping(A,B);
+	partial_matrix_mapping(A,B); */
 
 
-
+	/*
 
 
 fillkernels_c(alpha);
 kernel_mapping_c(alpha, ker);
 macarray_c(ker,B,out);
+*/
 
+	cv::Mat  img = cv::imread("/home/rass/AUnifiedAcceleratorImpl/dataset/Lenna.bmp",1);
+	xf::cv::Mat
+	std::cout << img.channels() << " ";
 
-
+	cv::imwrite("/home/rass/AUnifiedAcceleratorImpl/dataset/Hi.png",img);
 
 return 0;
 

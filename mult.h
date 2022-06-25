@@ -3,8 +3,10 @@
 
 //#include <assert.h>
 #include <stdint.h>
-//#include <hls_stream.h>
+#include <hls_stream.h>
 #include <ap_fixed.h>
+
+/*
 
 // Systolic Array Sizing :
 #define mc 8 //columns of the Systolic Array
@@ -22,7 +24,7 @@
 		//some more explicit function that just outputs by IO buffer without touching anything.
 		//i should try sending in actual data (images?) and check the ouput.
 //Conclusion : mc and mr can be "arbitrary". */
-
+/*
 // Kernel Sizing :
 #define k 3 //Square kernel size (must be odd?)
 
@@ -40,7 +42,10 @@
 #define idepth c*k*k //
 #define odepth //
 
+#define tc (h*l)/mc  */
 
+
+const int mc = 8, mr = 3, k=3, h=28, l=28, c=2, pad=0;
 
 
 // Data Types :
@@ -81,9 +86,12 @@ void input_mapping_naive_c(ImgType initial_input[c][h][l], ImgType flat_input[c*
 
 
 void altinput_mapping_naive_c(ImgType initial_input[c][h][l], ImgType flat_input[c*h*k][l]);
-void static_matrix_mapping(ImgType[c][h][l],ImgType[c*k*k][mc+2*pad]);
+void partial_matrix_mapping(ImgType[c][h][l],ImgType[c*k*k][mc+2*pad]);
 void padding();
 
+void conv_layer(ImgType ibuf[c*k*k][mc+2*pad], KerType kbuf[mr][c*k*k],MidType obuf[mr][mc]);
+void bnorm_layer();
+void activation_layer();
 
 // to do output ??
 
