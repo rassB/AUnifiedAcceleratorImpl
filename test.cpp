@@ -548,7 +548,7 @@ for (int i = 0; i < array.channels(); ++i)
 
 
 //Simulate Data Existing from Software.
-	cv::Mat  img = cv::imread("/home/boussa2u/Projet/UnifiedAccelerator/UnifiedAccelerator/dataset/50x50.bmp",1);
+	cv::Mat  img = cv::imread("/home/rass/AUnifiedAcceleratorImpl/dataset/50x50.bmp",1);
 
 	xf::cv::Mat<XF_8UC3,h,l,XF_NPPC1> array;   //8Bits, 3Channels, 50x50, Number of Pixels per clock cycle 1
 
@@ -635,13 +635,22 @@ for (int i = 0; i < c; ++i)
 		}
 	}
 
-for (int shift = 0; shift < k-1; ++shift)
+for (int shift = 0; shift < k; ++shift) //replicates pixels on shifting automatically, using this is much better than using static
+										//Static tables used to read data from other dimensions on overflow.
 	{
 		for (int var = 0; var < k-shift; ++var)
 			{
-				featureBuffer[k-shift].shift_left();
+				featureBuffer[k-shift].shift_pixels_left();
 			}
 	}
+
+std::cout << std::endl << "----------------------------Output Feature ----------------------------------" << std::endl;
+featureBuffer[0].window_print();
+featureBuffer[1].window_print();
+featureBuffer[2].window_print();
+
+
+
 return 0;
 
 }
