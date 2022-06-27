@@ -6,6 +6,7 @@
 #include <hls_stream.h>
 #include <ap_fixed.h>
 
+
 /*
 
 // Systolic Array Sizing :
@@ -45,7 +46,7 @@
 #define tc (h*l)/mc  */
 
 
-const int mc = 8, mr = 3, k=3, h=28, l=28, c=2, pad=0,MAX_CHANNELS=10;
+const int mc = 8, mr = 3, k=3, h=50, l=50, c=3, pad=0;
 
 
 // Data Types :
@@ -53,6 +54,7 @@ typedef ap_fixed<8,8> KerType; // 1 bit entier et 7 de virgule :) ==> will give 
 typedef ap_fixed<8,8> ImgType; // 8 entiers 8 vigule // temporary making it 16 16 for tests
 typedef ap_fixed<64,64> MidType; // 17 entiers 15 virgule :)
 // Zeros
+#define __DEBUG__ 1
 #define  ImgType_ZERO "0b0000000000000000"
 #define MidType_ZERO "0b0000000000000000000000000000000000000000000000000000000000000000"
 // AND DONT CAST ANYTHING JUST LEARN TO COUNT!

@@ -10,6 +10,9 @@
 #include "opencv2/opencv.hpp"
 #include <common/xf_structs.hpp>
 #include "imgproc/xf_channel_extract.hpp"
+
+#include <imgproc/xf_channel_combine.hpp>
+
 //#include <bitset>
 
 void macarray_c(KerType A[mr][c*k*k], ImgType B[c*k*k][mc],MidType C[mr][mc])
@@ -407,7 +410,7 @@ for (int i = 0; i < height; i++)
         for (int j = 0; j < width; j++)
 
 
-            if (i == 0 || (i > border_width && i < height - border_width))
+            if (i == 0 || (i > r_width && i < height - border_width))
             {
                 // read a pixel out of the input stream and cache it for
                 // immediate use and later replication purposes
@@ -440,11 +443,6 @@ for (int i = 0; i < height; i++)
         }
 	}
 */
-
-
-void acquire()
-{
-	}
 
 
 int main()
@@ -495,6 +493,10 @@ kernel_mapping_c(alpha, ker);
 macarray_c(ker,B,out);
 */
 
+/*
+Channel Splitting Unecessary ?
+
+	//Simulate Data Existing from PS.
 	cv::Mat  img = cv::imread("/home/rass/AUnifiedAcceleratorImpl/dataset/50x50.bmp",1);
 	cv::Mat ch[img.channels()];
 
@@ -502,9 +504,6 @@ macarray_c(ker,B,out);
 	{
 		cv::extractChannel(img, ch[i], i);
 	}
-
-
-
 
 
 	xf::cv::Mat<XF_8UC3,50,50,XF_NPPC1> array;
@@ -517,22 +516,129 @@ macarray_c(ker,B,out);
 	}
 
 
-for (int var = 0; var < array.channels(); ++var)
+for (int i = 0; i < array.channels(); ++i)
 {
-
-
-	for (int i = 0; i < 50; ++i)
+	for (int j = 0; j < 50; ++j)
 	{
-		for (int j = 0; j < 50; ++j)
+		for (int x = 0; x < 50; ++x)
 		{
-			std::cout << ImgType(unsigned(channels[var].read(j+i*50))) << " ";
+			std::cout << uint8_t(ImgType(channels[i].read(x+j*50))) << " ";  //casted into uint for display
 		}
 		std::cout << std::endl;
 	}
 	std::cout << std::endl;
 
+
 }
 
+
+/*
+		for (int j = 0; j < h; ++j)
+		{
+			for (int x = 0; x < l; ++x)
+			{
+
+			std::cout <<  ImgType(array.read(x+j*l)) << " ";
+
+			}
+			std::cout << std::endl;
+		}*/
+
+
+
+
+//Simulate Data Existing from Software.
+	cv::Mat  img = cv::imread("/home/rass/AUnifiedAcceleratorImpl/dataset/50x50.bmp",1);
+
+	xf::cv::Mat<XF_8UC3,h,l,XF_NPPC1> array;   //8Bits, 3Channels, 50x50, Number of Pixels per clock cycle 1
+
+	array.copyTo(img.data);
+
+	xf::cv::Mat<XF_8UC1,50,50,XF_NPPC1>channels[array.channels()];
+
+// to get the CHW order (4.2 paper), turns out channel splitting seems necessary.
+
+	for (int chh = 0; chh < array.channels(); ++chh)
+	{
+		xf::cv::extractChannel(array, channels[chh], chh);
+	}
+
+// write to an array to test the MAC.
+
+	ap_uint<8> A[c][h*l]; // internal array
+
+for (int i = 0; i < c; ++i)
+{
+	xf::cv::xfMat2Array(channels[i], A[i]);
+
+}
+
+
+
+
+//visualisation :
+/*
+	for (int i = 0; i < c; ++i)
+		{
+		for (int j = 0; j < h; ++j)
+			{
+			for (int x = 0; x < l; ++x)
+				{
+				std::cout <<  ImgType(uint8_t (A[i][x+j*l])) << " ";
+				}
+			std::cout<< std::endl;
+			}
+		std::cout << std::endl;
+		}*/
+
+ImgType B[c][h][l];
+
+for (int i = 0; i < c; ++i)
+	{
+	for (int j = 0; j < h; ++j)
+		{
+		for (int x = 0; x < l; ++x)
+			{
+			B[i][j][x] = A[i][x+j*l];
+			}
+		}
+	}
+
+/*
+for (int i = 0; i < c; ++i)
+	{
+	for (int j = 0; j < h; ++j)
+		{
+		for (int x = 0; x < l; ++x)
+			{
+			std::cout <<  B[i][j][x] <<" ";
+			}
+		std::cout<< std::endl;
+		}
+	std::cout << std::endl;
+	} */
+
+
+
+	xf::cv::Window<c*k,l,ImgType> featureBuffer;
+	xf::cv::LineBuffer<k*k,mc+2,ImgType> FeatureFIFO;
+
+	for (int chan = 0; chan < c; ++chan)
+	{
+		for (int Wrow = 0; Wrow < k; ++Wrow)
+		{
+			featureBuffer.insert_row( &B[chan][Wrow][l], Wrow);
+		}
+	}
+
+
+
+	//featureBuffer.window_print();
+
+	for (int copy = 0; copy < k; ++copy)
+	{
+
+	}
 
 return 0;
 
