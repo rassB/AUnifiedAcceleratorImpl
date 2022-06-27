@@ -630,7 +630,7 @@ for (int i = 0; i < c; ++i)
 		{
 			for (int cpy = 0; cpy < k; ++cpy)
 			{
-				featureBuffer[cpy].insert_row( &B[chan][Wrow][Wrow*l], Wrow+chan*c); //B will be streamed, not implemented yet.
+				featureBuffer[cpy].insert_row( &B[chan][Wrow][0], Wrow+chan*c); //B will be streamed, not implemented yet.
 			}
 		}
 	}
@@ -639,7 +639,7 @@ for (int shift = 0; shift < k-1; ++shift)
 	{
 		for (int var = 0; var < k-shift; ++var)
 			{
-				featureBuffer[k-shift].shift_pixels_left();
+				featureBuffer[k-shift].shift_left();
 			}
 	}
 return 0;
