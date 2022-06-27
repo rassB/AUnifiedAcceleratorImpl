@@ -619,7 +619,7 @@ for (int i = 0; i < c; ++i)
 	} */
 	ImgType B[c][h][l];
 	fillinputs_c(B);
-
+//TODO : Window can't be used as a FIFO, code has to be rethought: https://docs.xilinx.com/r/en-US/ug1399-vitis-hls/pragma-HLS-array_reshape //// https://docs.xilinx.com/r/en-US/ug1399-vitis-hls/M_AXI-Resources
 	xf::cv::Window<c*k,l,ImgType> featureBuffer[k];
 
 
