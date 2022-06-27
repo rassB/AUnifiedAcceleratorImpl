@@ -548,7 +548,7 @@ for (int i = 0; i < array.channels(); ++i)
 
 
 //Simulate Data Existing from Software.
-	cv::Mat  img = cv::imread("/home/rass/AUnifiedAcceleratorImpl/dataset/50x50.bmp",1);
+	cv::Mat  img = cv::imread("/home/boussa2u/Projet/UnifiedAccelerator/UnifiedAccelerator/dataset/50x50.bmp",1);
 
 	xf::cv::Mat<XF_8UC3,h,l,XF_NPPC1> array;   //8Bits, 3Channels, 50x50, Number of Pixels per clock cycle 1
 
@@ -591,7 +591,7 @@ for (int i = 0; i < c; ++i)
 		std::cout << std::endl;
 		}*/
 
-ImgType B[c][h][l];
+/*ImgType B[c][h][l];
 
 for (int i = 0; i < c; ++i)
 	{
@@ -602,7 +602,7 @@ for (int i = 0; i < c; ++i)
 			B[i][j][x] = A[i][x+j*l];
 			}
 		}
-	}
+	}*/
 
 /*
 for (int i = 0; i < c; ++i)
@@ -617,29 +617,31 @@ for (int i = 0; i < c; ++i)
 		}
 	std::cout << std::endl;
 	} */
+	ImgType B[c][h][l];
+	fillinputs_c(B);
+
+	xf::cv::Window<c*k,l,ImgType> featureBuffer[k];
 
 
-
-	xf::cv::Window<c*k,l,ImgType> featureBuffer;
-	xf::cv::LineBuffer<k*k,mc+2,ImgType> FeatureFIFO;
-
+//Read K rows of each channel and put them in a buffer. No tiling implemented Yet.
 	for (int chan = 0; chan < c; ++chan)
 	{
 		for (int Wrow = 0; Wrow < k; ++Wrow)
 		{
-			featureBuffer.insert_row( &B[chan][Wrow][l], Wrow);
+			for (int cpy = 0; cpy < k; ++cpy)
+			{
+				featureBuffer[cpy].insert_row( &B[chan][Wrow][Wrow*l], Wrow+chan*c); //B will be streamed, not implemented yet.
+			}
 		}
 	}
 
-
-
-	//featureBuffer.window_print();
-
-	for (int copy = 0; copy < k; ++copy)
+for (int shift = 0; shift < k-1; ++shift)
 	{
-
+		for (int var = 0; var < k-shift; ++var)
+			{
+				featureBuffer[k-shift].shift_pixels_left();
+			}
 	}
-
 return 0;
 
 }
