@@ -649,7 +649,26 @@ featureBuffer[0].window_print();
 featureBuffer[1].window_print();
 featureBuffer[2].window_print();
 
+// Make Kernel, Make OutBuf, Mac Calc
 
+
+// Acquire for whoole height.
+
+// Output Reshaping into Image
+
+
+
+
+// Fix the format question CHW HWC debate, keep XRT in mind.
+// Pad Image in the input with xf::cv functions.
+// Study the Stream stuff use xf functions.
+
+// Accumulate two layers why ?
+// Batch Norm.
+// Activation.
+
+// Impl.
+// Impl XRT.
 
 return 0;
 
