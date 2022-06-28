@@ -548,7 +548,7 @@ for (int i = 0; i < array.channels(); ++i)
 
 
 //Simulate Data Existing from Software.
-	cv::Mat  img = cv::imread("/home/rass/AUnifiedAcceleratorImpl/dataset/50x50.bmp",1);
+	cv::Mat  img = cv::imread("/home/boussa2u/Projet/UnifiedAccelerator/UnifiedAccelerator/dataset/50x50.bmp",1);
 
 	xf::cv::Mat<XF_8UC3,h,l,XF_NPPC1> array;   //8Bits, 3Channels, 50x50, Number of Pixels per clock cycle 1
 
@@ -556,7 +556,7 @@ for (int i = 0; i < array.channels(); ++i)
 
 	xf::cv::Mat<XF_8UC1,50,50,XF_NPPC1>channels[array.channels()];
 
-// to get the CHW order (4.2 paper), turns out channel splitting seems necessary.
+// to get the CHW order (4.2 paper), turns out channel splitting IS necessary.
 
 	for (int chh = 0; chh < array.channels(); ++chh)
 	{
@@ -617,8 +617,11 @@ for (int i = 0; i < c; ++i)
 		}
 	std::cout << std::endl;
 	} */
-	ImgType B[c][h][l];
+
+	ImgType B[c][h][l]; // use dummy array for testing.
 	fillinputs_c(B);
+
+
 //TODO : Window can't be used as a FIFO, code has to be rethought: https://docs.xilinx.com/r/en-US/ug1399-vitis-hls/pragma-HLS-array_reshape //// https://docs.xilinx.com/r/en-US/ug1399-vitis-hls/M_AXI-Resources
 	xf::cv::Window<c*k,l,ImgType> featureBuffer[k];
 
@@ -648,8 +651,43 @@ std::cout << std::endl << "----------------------------Output Feature ----------
 featureBuffer[0].window_print();
 featureBuffer[1].window_print();
 featureBuffer[2].window_print();
+std::cout << std::endl << "---------------------------- END Output Feature ----------------------------------" << std::endl;
 
-// Make Kernel, Make OutBuf, Mac Calc
+
+
+
+
+
+
+
+
+
+					ImgType inputs[c][h][l], mapped[c*k*k][mc+2*pad];
+					KerType alpha[mr][c][k][k], ker[mr][k*k*c];
+					MidType out[mr][mc];
+
+						fillinputs_c(inputs);
+						partial_matrix_mapping(inputs,mapped);
+
+
+
+
+
+					fillkernels_c(alpha);
+					kernel_mapping_c(alpha, ker);
+					macarray_c(ker,mapped,out);
+
+
+
+				// Make Kernel, Make OutBuf, Mac Calc
+
+/*
+	std::cout << featureBuffer[0].getval(0, 0)<< std::endl;
+					std::cout << featureBuffer[1].getval(0, 0)<< std::endl;
+					std::cout << featureBuffer[2].getval(0, 0)<< std::endl;
+*/
+
+
 
 
 // Acquire for whoole height.

@@ -46,7 +46,7 @@
 #define tc (h*l)/mc  */
 
 
-const int mc = 8, mr = 3, k=3, h=50, l=50, c=3, pad=0;
+const int mc = 3, mr = 3, k=3, h=50, l=50, c=3, pad=0;
 
 
 // Data Types :
