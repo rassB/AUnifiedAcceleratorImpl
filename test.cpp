@@ -81,11 +81,11 @@ void fillarrays_c(KerType alpha[mr][k*k*c], ImgType beta[c*k*k][mc])
 	std::cout <<std::endl;
 
 }
-void fillkernels_c(KerType alpha[mr][c][k][k])
+void fillkernels_c(KerType alpha[m][c][k][k])
 {
 	int completed=0;
 
-	for (int i = 0; i < mr; ++i)
+	for (int i = 0; i < m; ++i)
 	{
 		for (int j = 0; j < c; ++j)
 		{
@@ -98,7 +98,7 @@ void fillkernels_c(KerType alpha[mr][c][k][k])
 			}
 		}
 	}
-	for (int ii = 0; ii < mr; ++ii)
+	for (int ii = 0; ii < m; ++ii)
 	{
 		for (int jj = 0; jj < c; ++jj)
 		{
@@ -472,14 +472,16 @@ void kernel_mapping_c2(KerType initial_kernel[mr][c][k][k],xf::cv::Window<mr,c*k
 			}
 		}
 	}
-	std::cout << "-----------------------------------------------------------------------"<< std::endl;
+	std::cout << "--------------------------------- Start Kernel Mapping --------------------------------------"<< std::endl;
 	kmap[0].window_print();
 	kmap[1].window_print();
 	kmap[2].window_print();
+	std::cout << "--------------------------------- End Kernel Mapping --------------------------------------"<< std::endl;
 }
 
-void mac_array2(xf::cv::Window<mr,c*k, KerType> A[k], xf::cv::Window<c*k,l,ImgType> B[k],xf::cv::Window<mr,mc,MidType> C)
+void mac_array_c2(xf::cv::Window<mr,c*k, KerType> A[k], xf::cv::Window<c*k,l,ImgType> B[k],xf::cv::Window<mr,mc,MidType> C)
     {
+    std::cout << std::endl << "---------------------------- Mult Happening ----------------------------------" << std::endl;
     MidType last,temp;
 	for (int t = 0; t < c*k; ++t)
 	    {
@@ -496,9 +498,47 @@ void mac_array2(xf::cv::Window<mr,c*k, KerType> A[k], xf::cv::Window<c*k,l,ImgTy
 		    }
 		}
 	    }
-
+	std::cout << std::endl << "---------------------------- Start MAC Output----------------------------------" << std::endl;
 	C.window_print();
+	std::cout << std::endl << "---------------------------- End MAC Output  ----------------------------------" << std::endl;
     }
+
+
+void mapwindow_c2(ImgType B[c][h][l],xf::cv::Window<c*k,l,ImgType> featureBuffer[k])
+    {
+    //TODO : Window can't be used as a FIFO, code has to be rethought: https://docs.xilinx.com/r/en-US/ug1399-vitis-hls/pragma-HLS-array_reshape //// https://docs.xilinx.com/r/en-US/ug1399-vitis-hls/M_AXI-Resources
+
+
+
+    //Read K rows of each channel and put them in a buffer. No tiling implemented Yet.
+    	for (int chan = 0; chan < c; ++chan)
+    	{
+    		for (int Wrow = 0; Wrow < k; ++Wrow)
+    		{
+    			for (int cpy = 0; cpy < k; ++cpy)
+    			{
+    				featureBuffer[cpy].insert_row( &B[chan][Wrow][0], Wrow+chan*c); //B will be streamed, not implemented yet.
+    			}
+    		}
+    	}
+
+    for (int shift = 0; shift < k; ++shift) //replicates pixels on shifting automatically, using this is much better than using static
+    										//Static tables used to read data from other dimensions on overflow.
+    	{
+    		for (int var = 0; var < k-shift; ++var)
+    			{
+    				featureBuffer[k-shift].shift_pixels_left();
+    			}
+    	}
+
+    std::cout << std::endl << "---------------------------- Show Mapped Feature ---------------------------------" << std::endl;
+    for (int visual = 0; visual < k; ++visual)
+        {
+        featureBuffer[visual].window_print();
+        }
+    std::cout << std::endl << "---------------------------- END Mapped Feature ----------------------------------" << std::endl;
+    }
+
 
 
 
@@ -675,40 +715,12 @@ for (int i = 0; i < c; ++i)
 	std::cout << std::endl;
 	} */
 
-	ImgType B[c][h][l]; // use dummy array for testing.
-	fillinputs_c(B);
 
 
-//TODO : Window can't be used as a FIFO, code has to be rethought: https://docs.xilinx.com/r/en-US/ug1399-vitis-hls/pragma-HLS-array_reshape //// https://docs.xilinx.com/r/en-US/ug1399-vitis-hls/M_AXI-Resources
-	xf::cv::Window<c*k,l,ImgType> featureBuffer[k];
+    // Fix the format question CHW HWC debate, keep XRT in mind.
+// TODO :Pad Image in the input with xf::cv functions.
+    // Study the Stream stuff use xf functions.
 
-
-//Read K rows of each channel and put them in a buffer. No tiling implemented Yet.
-	for (int chan = 0; chan < c; ++chan)
-	{
-		for (int Wrow = 0; Wrow < k; ++Wrow)
-		{
-			for (int cpy = 0; cpy < k; ++cpy)
-			{
-				featureBuffer[cpy].insert_row( &B[chan][Wrow][0], Wrow+chan*c); //B will be streamed, not implemented yet.
-			}
-		}
-	}
-
-for (int shift = 0; shift < k; ++shift) //replicates pixels on shifting automatically, using this is much better than using static
-										//Static tables used to read data from other dimensions on overflow.
-	{
-		for (int var = 0; var < k-shift; ++var)
-			{
-				featureBuffer[k-shift].shift_pixels_left();
-			}
-	}
-
-std::cout << std::endl << "----------------------------Output Feature ----------------------------------" << std::endl;
-featureBuffer[0].window_print();
-featureBuffer[1].window_print();
-featureBuffer[2].window_print();
-std::cout << std::endl << "---------------------------- END Output Feature ----------------------------------" << std::endl;
 
 
 
@@ -717,23 +729,21 @@ std::cout << std::endl << "---------------------------- END Output Feature -----
     // Make Kernel, Make OutBuf, Mac Calc
 
 
+ImgType B[c][h][l]; // use dummy array for testing. Replace with IMG.
+fillinputs_c(B);
+
+xf::cv::Window<c*k,l,ImgType> featureBuffer[k];
+mapwindow_c2(B,featureBuffer);
 
 
-
-
-
-KerType initial_kernell[mr][c][k][k];
+KerType initial_kernell[m][c][k][k];
 fillkernels_c(initial_kernell);
 
 xf::cv::Window<mr,c*k,KerType> weightBuffer[k];
 kernel_mapping_c2(initial_kernell, weightBuffer);
 
 xf::cv::Window<mr,mc,MidType> C;
-
-std::cout << std::endl << "---------------------------- Mult Happening ----------------------------------" << std::endl;
-mac_array2(weightBuffer, featureBuffer, C);
-
-/*
+mac_array_c2(weightBuffer, featureBuffer, C);
 
 
 
@@ -743,63 +753,20 @@ mac_array2(weightBuffer, featureBuffer, C);
 
 
 
-    /*
-				for (int t = 0; t < c*k; ++t)
-				    {
-				    for (int copy = 0; copy < k; ++copy)
-					{
-					for (int i = 0; i < mr; ++i)
-					    {
-						for (int j = 0; j < mc; ++j)
-						    {
-							std::cout << weightBuffer[copy].getval(i, t) ;//<<featureBuffer[copy].getval(t, j)<< std::endl;
-
-						    }
-					    }
-					}
-				    }*/
-
-
-
-
-/*
-
-
-
-
-					ImgType inputs[c][h][l], mapped[c*k*k][mc+2*pad];
-					KerType alpha[mr][c][k][k], ker[mr][k*k*c];
-					MidType out[mr][mc];
-
-						fillinputs_c(inputs);
-						partial_matrix_mapping(inputs,mapped);
+// shift pixels left into the image and refeed to mapper, in a loop until i finish the lenght
 
 
 
 
 
-					fillkernels_c(alpha);
-					kernel_mapping_c(alpha, ker);
-					macarray_c(ker,mapped,out);
 
-
-
-*/
-
-
-
-
-
-// Acquire for whoole height.
 
 // Output Reshaping into Image
 
 
 
 
-// Fix the format question CHW HWC debate, keep XRT in mind.
-// Pad Image in the input with xf::cv functions.
-// Study the Stream stuff use xf functions.
+
 
 // Accumulate two layers why ?
 // Batch Norm.

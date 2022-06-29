@@ -5,6 +5,9 @@
 #include <stdint.h>
 #include <hls_stream.h>
 #include <ap_fixed.h>
+#include "mult.h"
+#include <iostream>
+
 
 
 
@@ -45,9 +48,9 @@
 #define odepth //
 
 #define tc (h*l)/mc  */
+#define __DEBUG__ 1 // has to be defined before the involved libraries, stupid right ?
 
-
-const int mc = 3, mr = 3, k=3, h=50, l=50, c=3, pad=0;
+const int mc = 3, mr = 3, k=3, h=50, l=50, c=3, pad=0, m=64;
 
 
 // Data Types :
@@ -55,7 +58,7 @@ typedef ap_fixed<16,16> KerType; // 1 bit entier et 7 de virgule :) ==> will giv
 typedef ap_fixed<16,16> ImgType; // 8 entiers 8 vigule // temporary making it 16 16 for tests
 typedef ap_fixed<64,64> MidType; // 17 entiers 15 virgule :)
 // Zeros
-#define __DEBUG__ 1
+
 #define  ImgType_ZERO "0b0000000000000000"
 #define MidType_ZERO "0b0000000000000000000000000000000000000000000000000000000000000000"
 // AND DONT CAST ANYTHING JUST LEARN TO COUNT!
@@ -92,9 +95,10 @@ void altinput_mapping_naive_c(ImgType initial_input[c][h][l], ImgType flat_input
 void partial_matrix_mapping(ImgType[c][h][l],ImgType[c*k*k][mc+2*pad]);
 void padding();
 
-
-
-
+//BRING BACK WHEN YOU'VE DISABLED DEBUG
+/*
+void mapwindow_c2(ImgType B[c][h][l],xf::cv::Window<c*k,l,ImgType> featureBuffer);
+void mapwindow_c2(ImgType B[c][h][l],xf::cv::Window<c*k,l,ImgType> featureBuffer[k]);*/
 
 void conv_layer(ImgType ibuf[c*k*k][mc+2*pad], KerType kbuf[mr][c*k*k],MidType obuf[mr][mc]);
 void bnorm_layer();
