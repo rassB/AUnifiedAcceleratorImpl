@@ -92,6 +92,10 @@ void altinput_mapping_naive_c(ImgType initial_input[c][h][l], ImgType flat_input
 void partial_matrix_mapping(ImgType[c][h][l],ImgType[c*k*k][mc+2*pad]);
 void padding();
 
+
+
+
+
 void conv_layer(ImgType ibuf[c*k*k][mc+2*pad], KerType kbuf[mr][c*k*k],MidType obuf[mr][mc]);
 void bnorm_layer();
 void activation_layer();

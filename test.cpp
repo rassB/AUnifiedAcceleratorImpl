@@ -446,6 +446,10 @@ for (int i = 0; i < height; i++)
 
 
 
+
+
+
+
 void kernel_mapping_c2(KerType initial_kernel[mr][c][k][k],xf::cv::Window<mr,c*k, KerType> kmap[k])
 {
 	//64 ×3 kernels with a size of 3 ×3 are mapped to a rearranged matrix with dimensions of 64 ×(3 ×3 ×3).  (they use 64 mc in their impl.)
@@ -473,18 +477,28 @@ void kernel_mapping_c2(KerType initial_kernel[mr][c][k][k],xf::cv::Window<mr,c*k
 	kmap[1].window_print();
 	kmap[2].window_print();
 }
-/*
-	for (int ii = 0; ii < mr; ++ii)
-	{
-		for (int jj = 0; jj < c*k*k; ++jj)
+
+void mac_array2(xf::cv::Window<mr,c*k, KerType> A[k], xf::cv::Window<c*k,l,ImgType> B[k],xf::cv::Window<mr,mc,MidType> C)
+    {
+    MidType last,temp;
+	for (int t = 0; t < c*k; ++t)
+	    {
+	    for (int copy = 0; copy < k; ++copy)
 		{
-			std::cout<<flat_kernel[ii][jj]<< " ";
+		for (int i = 0; i < mr; ++i)
+		    {
+			for (int j = 0; j < mc; ++j)
+			    {
+				last = (t==0)? MidType_ZERO: C.getval(i, j);
+			    	temp = A[copy].getval(i, t)*B[copy].getval(t, j);
+			    	C.insert_pixel(last+temp, i, j);
+			    }
+		    }
 		}
-		std::cout<<std::endl;
-	}
+	    }
 
-}*/
-
+	C.window_print();
+    }
 
 
 
@@ -572,7 +586,7 @@ for (int i = 0; i < array.channels(); ++i)
 	std::cout << std::endl;
 
 
-}*
+}
 
 
 
@@ -587,8 +601,8 @@ for (int i = 0; i < array.channels(); ++i)
 			std::cout << std::endl;
 		}
 
-/*
-
+*/
+    /*
 
 //Simulate Data Existing from Software.
 	cv::Mat  img = cv::imread("/home/rass/AUnifiedAcceleratorImpl/dataset/50x50.bmp",1);
@@ -618,7 +632,7 @@ for (int i = 0; i < c; ++i)
 
 
 
-/*
+
 //visualisation :
 
 	for (int i = 0; i < c; ++i)
@@ -632,9 +646,9 @@ for (int i = 0; i < c; ++i)
 			std::cout<< std::endl;
 			}
 		std::cout << std::endl;
-		}*/
+		}
 
-/*ImgType B[c][h][l];            //put A in B
+ImgType B[c][h][l];            //put A in B
 
 for (int i = 0; i < c; ++i)
 	{
@@ -660,7 +674,7 @@ for (int i = 0; i < c; ++i)
 		}
 	std::cout << std::endl;
 	} */
-/*
+
 	ImgType B[c][h][l]; // use dummy array for testing.
 	fillinputs_c(B);
 
@@ -695,7 +709,7 @@ featureBuffer[0].window_print();
 featureBuffer[1].window_print();
 featureBuffer[2].window_print();
 std::cout << std::endl << "---------------------------- END Output Feature ----------------------------------" << std::endl;
-*/
+
 
 
 
@@ -703,14 +717,33 @@ std::cout << std::endl << "---------------------------- END Output Feature -----
     // Make Kernel, Make OutBuf, Mac Calc
 
 
-MidType last,temp,C[mr][mc];
+
+
+
+
+
 KerType initial_kernell[mr][c][k][k];
-xf::cv::Window<mr,c*k,KerType> weightBuffer[k];
 fillkernels_c(initial_kernell);
+
+xf::cv::Window<mr,c*k,KerType> weightBuffer[k];
 kernel_mapping_c2(initial_kernell, weightBuffer);
 
+xf::cv::Window<mr,mc,MidType> C;
+
+std::cout << std::endl << "---------------------------- Mult Happening ----------------------------------" << std::endl;
+mac_array2(weightBuffer, featureBuffer, C);
+
+/*
 
 
+
+
+
+
+
+
+
+    /*
 				for (int t = 0; t < c*k; ++t)
 				    {
 				    for (int copy = 0; copy < k; ++copy)
@@ -724,7 +757,7 @@ kernel_mapping_c2(initial_kernell, weightBuffer);
 						    }
 					    }
 					}
-				    }
+				    }*/
 
 
 
