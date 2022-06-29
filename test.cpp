@@ -548,7 +548,7 @@ for (int i = 0; i < array.channels(); ++i)
 
 
 //Simulate Data Existing from Software.
-	cv::Mat  img = cv::imread("/home/boussa2u/Projet/UnifiedAccelerator/UnifiedAccelerator/dataset/50x50.bmp",1);
+	cv::Mat  img = cv::imread("/home/rass/AUnifiedAcceleratorImpl/dataset/50x50.bmp",1);
 
 	xf::cv::Mat<XF_8UC3,h,l,XF_NPPC1> array;   //8Bits, 3Channels, 50x50, Number of Pixels per clock cycle 1
 
@@ -591,7 +591,7 @@ for (int i = 0; i < c; ++i)
 		std::cout << std::endl;
 		}*/
 
-/*ImgType B[c][h][l];
+/*ImgType B[c][h][l];            //put A in B
 
 for (int i = 0; i < c; ++i)
 	{
@@ -660,6 +660,36 @@ std::cout << std::endl << "---------------------------- END Output Feature -----
 
 
 
+MidType last,temp,C[mr][mc];
+KerType alpha[mr][c][k][k],ker[mr][c*k*k];
+
+fillkernels_c(alpha);
+kernel_mapping_c(alpha, ker);
+
+xf::cv::Window<mr,c*k,KerType> weightBuffer[k];
+
+
+				for (int t = 0; t < c*k; ++t)
+				    {
+				    for (int copy = 0; copy < k; ++copy)
+					{
+					for (int i = 0; i < mr; ++i)
+					    {
+						for (int j = 0; j < mc; ++j)
+						    {
+							std::cout << weightBuffer[copy].getval(i, t) ;//<<featureBuffer[copy].getval(t, j)<< std::endl;
+
+						    }
+					    }
+					}
+				    }
+
+
+				// Make Kernel, Make OutBuf, Mac Calc
+
+/*
+
+
 
 
 					ImgType inputs[c][h][l], mapped[c*k*k][mc+2*pad];
@@ -679,12 +709,6 @@ std::cout << std::endl << "---------------------------- END Output Feature -----
 
 
 
-				// Make Kernel, Make OutBuf, Mac Calc
-
-/*
-	std::cout << featureBuffer[0].getval(0, 0)<< std::endl;
-					std::cout << featureBuffer[1].getval(0, 0)<< std::endl;
-					std::cout << featureBuffer[2].getval(0, 0)<< std::endl;
 */
 
 
