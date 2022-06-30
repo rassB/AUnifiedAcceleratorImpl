@@ -93,7 +93,7 @@ void fillkernels_c(KerType alpha[m][c][k][k])
 			{
 				for (int y = 0; y < k; ++y)
 				{
-					alpha[i][j][x][y]= completed++;
+					alpha[i][j][x][y]= 1;
 				}
 			}
 		}
@@ -731,7 +731,7 @@ for (int i = 0; i < c; ++i)
 
 KerType initial_kernell[m][c][k][k];
 ImgType B[c][h][l]; // use dummy array for testing. Replace with IMG.
-xf::cv::Window<m,l,MidType> outb;
+xf::cv::Window<m,l,MidType> outb[0];  //has to smh be a [] otherwise isn't persistent across functions.
 xf::cv::Window<c*k,l,ImgType> featureBuffer[k];
 xf::cv::Window<m,c*k,KerType> weightBuffer[k];
 
@@ -748,23 +748,33 @@ fillkernels_c(initial_kernell);
 kernel_mapping_c2(initial_kernell, weightBuffer);
 
 
-mac_array_c2(weightBuffer, featureBuffer, outb);
-
-outb.window_print();
+std::cout << std::endl << "---------------------------- START LAYER ----------------------------------" << std::endl;
 
 
+for (int thrimg = 0; thrimg < l/mc; ++thrimg)
+    {
+    std::cout << std::endl << "BLOCK"<< thrimg << "----------------------------------"<< std::endl;
 
-/*
+    mac_array_c2(weightBuffer, featureBuffer, outb[0]);
 
-    for (int shifts = 0; shifts < mc; ++shifts)
+    // shift pixels left into the image and refeed to mapper, in a loop until i finish the lenght
+    std::cout << std::endl << "BLOCK"<< thrimg << " OUTPUT Shifting----------------------------------"<< std::endl;
+
+    for (int shift = 0; shift < mc; ++shift)
 	{
-	for (int i = 0; i < k; ++i)
+		outb[0].shift_pixels_right();
+
+	for (int copy = 0; copy < k; ++copy)
 	    {
-	    featureBuffer[i].shift_pixels_left();
+	    std::cout << std::endl << "BLOCK"<< thrimg << " INPUT Shifting----------------------------------"<< std::endl;
+		featureBuffer[copy].shift_pixels_left();
 	    }
 
 	}
-  */
+    }
+std::cout << std::endl <<" ----------------- LAST WINDOW-----------------"<< std::endl;
+
+outb[0].window_print();
 
 
 
@@ -774,7 +784,8 @@ outb.window_print();
 
 
 
-// shift pixels left into the image and refeed to mapper, in a loop until i finish the lenght
+
+
 
 
 
