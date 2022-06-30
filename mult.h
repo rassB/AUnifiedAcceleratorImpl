@@ -50,7 +50,7 @@
 #define tc (h*l)/mc  */
 #define __DEBUG__ 1 // has to be defined before the involved libraries, stupid right ?
 
-const int mc = 3, mr = 3, k=3, h=50, l=50, c=3, pad=0, m=64;
+const int mc = 3, mr = 3, k=3, h=50, l=50, c=3, pad=0, m=3;
 
 
 // Data Types :

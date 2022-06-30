@@ -450,13 +450,13 @@ for (int i = 0; i < height; i++)
 
 
 
-void kernel_mapping_c2(KerType initial_kernel[mr][c][k][k],xf::cv::Window<mr,c*k, KerType> kmap[k])
+void kernel_mapping_c2(KerType initial_kernel[m][c][k][k],xf::cv::Window<m,c*k, KerType> kmap[k])
 {
 	//64 ×3 kernels with a size of 3 ×3 are mapped to a rearranged matrix with dimensions of 64 ×(3 ×3 ×3).  (they use 64 mc in their impl.)
 	//void kernel_mapping_c(KerType initial_kernel[mr][c][k][k],KerType flat_kernel[mr][c*k*k]);
 	int mr_counter =0;
 
-	for (int i = 0; i < mr; ++i)
+	for (int i = 0; i < m; ++i)
 	{
 		mr_counter =0;
 		for (int j = 0; j < c; ++j)
@@ -479,7 +479,7 @@ void kernel_mapping_c2(KerType initial_kernel[mr][c][k][k],xf::cv::Window<mr,c*k
 	std::cout << "--------------------------------- End Kernel Mapping --------------------------------------"<< std::endl;
 }
 
-void mac_array_c2(xf::cv::Window<mr,c*k, KerType> A[k], xf::cv::Window<c*k,l,ImgType> B[k],xf::cv::Window<mr,mc,MidType> C)
+void mac_array_c2(xf::cv::Window<m,c*k, KerType> A[k], xf::cv::Window<c*k,l,ImgType> B[k],xf::cv::Window<m,l,MidType> C)
     {
     std::cout << std::endl << "---------------------------- Mult Happening ----------------------------------" << std::endl;
     MidType last,temp;
@@ -498,6 +498,7 @@ void mac_array_c2(xf::cv::Window<mr,c*k, KerType> A[k], xf::cv::Window<c*k,l,Img
 		    }
 		}
 	    }
+
 	std::cout << std::endl << "---------------------------- Start MAC Output----------------------------------" << std::endl;
 	C.window_print();
 	std::cout << std::endl << "---------------------------- End MAC Output  ----------------------------------" << std::endl;
@@ -728,22 +729,42 @@ for (int i = 0; i < c; ++i)
 
     // Make Kernel, Make OutBuf, Mac Calc
 
-
+KerType initial_kernell[m][c][k][k];
 ImgType B[c][h][l]; // use dummy array for testing. Replace with IMG.
+xf::cv::Window<m,l,MidType> outb;
+xf::cv::Window<c*k,l,ImgType> featureBuffer[k];
+xf::cv::Window<m,c*k,KerType> weightBuffer[k];
+
 fillinputs_c(B);
 
-xf::cv::Window<c*k,l,ImgType> featureBuffer[k];
+
 mapwindow_c2(B,featureBuffer);
 
 
-KerType initial_kernell[m][c][k][k];
+
 fillkernels_c(initial_kernell);
 
-xf::cv::Window<mr,c*k,KerType> weightBuffer[k];
+
 kernel_mapping_c2(initial_kernell, weightBuffer);
 
-xf::cv::Window<mr,mc,MidType> C;
-mac_array_c2(weightBuffer, featureBuffer, C);
+
+mac_array_c2(weightBuffer, featureBuffer, outb);
+
+outb.window_print();
+
+
+
+/*
+
+    for (int shifts = 0; shifts < mc; ++shifts)
+	{
+	for (int i = 0; i < k; ++i)
+	    {
+	    featureBuffer[i].shift_pixels_left();
+	    }
+
+	}
+  */
 
 
 
