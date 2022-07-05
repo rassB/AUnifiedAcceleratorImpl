@@ -93,6 +93,7 @@ void fillkernels_c(KerType alpha[m][c][k][k])
 		{
 		for (int y = 0; y < k; ++y)
 		    {
+		    //(x==y)? alpha[i][j][x][y]=1:alpha[i][j][x][y]=0;
 		    alpha[i][j][x][y] = completed++;
 		    //alpha[i][j][x][y] = 1;
 
@@ -502,14 +503,13 @@ void kernel_mapping_c2(KerType initial_kernel[m][c][k][k],
 	    << std::endl;
     }
 
-void mac_array_c2(xf::cv::Window<m, c * k, KerType> A[k],
-	xf::cv::Window<c * k, l, ImgType> B[k], xf::cv::Window<m, l, MidType> C)
+void mac_array_c2(xf::cv::Window<m, c * k, KerType> A[k],xf::cv::Window<c * k, l, ImgType> B[k], xf::cv::Window<m, l, MidType> C)
     {
     std::cout << std::endl
 	    << "---------------------------- Mult Happening ----------------------------------"
 	    << std::endl;
 
-    MidType last, temp;
+    static MidType last=MidType_ZERO, temp=MidType_ZERO;
 
     for (int t = 0; t < c * k; ++t)
 	{
@@ -537,8 +537,7 @@ void mac_array_c2(xf::cv::Window<m, c * k, KerType> A[k],
 	    << std::endl;
     }
 
-void mapwindow_c2(ImgType B[c][h][l],
-	xf::cv::Window<c * k, l, ImgType> featureBuffer[k])
+void mapwindow_c2(ImgType B[c][h][l],xf::cv::Window<c * k, l, ImgType> featureBuffer[k])
     {
     //TODO : Window can't be used as a FIFO, code has to be rethought: https://docs.xilinx.com/r/en-US/ug1399-vitis-hls/pragma-HLS-array_reshape //// https://docs.xilinx.com/r/en-US/ug1399-vitis-hls/M_AXI-Resources
 
@@ -786,7 +785,7 @@ int main()
 		<< "------------------MAC CALCULATION----------------"
 		<< std::endl;
 
-	MidType last = 0, temp = 0; // for some reason i can't call a function, and data isn't persistent if mac_array_c2 make the MAC Mult, probably has to do with multiple kernel simulations.
+	static MidType last=MidType_ZERO, temp=MidType_ZERO; // for some reason i can't call a function, and data isn't persistent if mac_array_c2 make the MAC Mult, probably has to do with multiple kernel simulations.
 
 	for (int t = 0; t < c * k; ++t)
 	    {
@@ -804,6 +803,9 @@ int main()
 		    }
 		}
 	    }
+
+
+
 
 	// shift pixels left into the image and refeed to mapper, in a loop until i finishes the lenght
 	std::cout << std::endl << "BLOCK" << thrimg
@@ -824,6 +826,11 @@ int main()
 		    }
 
 		}
+	    }
+	else {
+	    std::cout << std::endl << "BLOCK" << thrimg
+	    			    << " Last window doesn't shift----------------------------------"
+	    			    << std::endl;
 	    }
 
 	}
