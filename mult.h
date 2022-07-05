@@ -50,7 +50,7 @@
 #define tc (h*l)/mc  */
 #define __DEBUG__ 1 // has to be defined before the involved libraries, stupid right ?
 
-const int mc = 3, mr = 3, k=3, h=50, l=50, c=3, pad=0, m=3;
+const int mc = 5, mr = 3, k=3, h=50, l=50, c=1, pad=0, m=3;
 
 
 // Data Types :
@@ -61,6 +61,7 @@ typedef ap_fixed<64,64> MidType; // 17 entiers 15 virgule :)
 
 #define  ImgType_ZERO "0b0000000000000000"
 #define MidType_ZERO "0b0000000000000000000000000000000000000000000000000000000000000000"
+#define KerType_ZERO "0b0000000000000000"
 // AND DONT CAST ANYTHING JUST LEARN TO COUNT!
 
 /*
