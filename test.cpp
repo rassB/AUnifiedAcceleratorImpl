@@ -503,13 +503,14 @@ void kernel_mapping_c2(KerType initial_kernel[m][c][k][k],
 	    << std::endl;
     }
 
-void mac_array_c2(xf::cv::Window<m, c * k, KerType> A[k],xf::cv::Window<c * k, l, ImgType> B[k], xf::cv::Window<m, l, MidType> C)
+void mac_array_c2(xf::cv::Window<m, c * k, KerType> A[k],
+	xf::cv::Window<c * k, l, ImgType> B[k], xf::cv::Window<m, l, MidType> C)
     {
     std::cout << std::endl
 	    << "---------------------------- Mult Happening ----------------------------------"
 	    << std::endl;
 
-    static MidType last=MidType_ZERO, temp=MidType_ZERO;
+    static MidType last = MidType_ZERO, temp = MidType_ZERO;
 
     for (int t = 0; t < c * k; ++t)
 	{
@@ -537,7 +538,8 @@ void mac_array_c2(xf::cv::Window<m, c * k, KerType> A[k],xf::cv::Window<c * k, l
 	    << std::endl;
     }
 
-void mapwindow_c2(ImgType B[c][h][l],xf::cv::Window<c * k, l, ImgType> featureBuffer[k])
+void mapwindow_c2(ImgType B[c][h][l],
+	xf::cv::Window<c * k, l, ImgType> featureBuffer[k])
     {
     //TODO : Window can't be used as a FIFO, code has to be rethought: https://docs.xilinx.com/r/en-US/ug1399-vitis-hls/pragma-HLS-array_reshape //// https://docs.xilinx.com/r/en-US/ug1399-vitis-hls/M_AXI-Resources
 
@@ -761,7 +763,6 @@ int main()
     ImgType B[c][h][l]; // use dummy array for testing. Replace with IMG.
     fillinputs_c(B);
 
-
     static xf::cv::Window<m, c * k, KerType> weightBuffer[k];
     kernel_mapping_c2(initial_kernell, weightBuffer);
 
@@ -769,7 +770,7 @@ int main()
     mapwindow_c2(B, featureBuffer);
 
     static xf::cv::Window<m, l, MidType> outb; // TODO: Data not persisting across function calls ?
-						   //NOTSOLVED: Have to use "static Variables" https://docs.xilinx.com/r/en-US/ug1399-vitis-hls/Unrolling-Loops-to-Improve-Pipelining
+					       //NOTSOLVED: Have to use "static Variables" https://docs.xilinx.com/r/en-US/ug1399-vitis-hls/Unrolling-Loops-to-Improve-Pipelining
 
     std::cout << std::endl
 	    << "---------------------------- START LAYER ----------------------------------"
@@ -780,15 +781,15 @@ int main()
      {
 
      // acquire new line. to be implemented/}
-      */
+     */
 
-    for (int thrimg = 0; thrimg < (l/mc+(((l%mc)>0)?1:0)); ++thrimg) // add one block and in case division is not round, implicit pixel replication policy induced by shifting.
+    for (int thrimg = 0; thrimg < (l / mc + (((l % mc) > 0) ? 1 : 0)); ++thrimg) // add one block and in case division is not round, implicit pixel replication policy induced by shifting.
 	{
 	std::cout << std::endl << "BLOCK" << thrimg
 		<< "------------------MAC CALCULATION----------------"
 		<< std::endl;
 
-	static MidType last=MidType_ZERO, temp=MidType_ZERO; // for some reason i can't call a function, and data isn't persistent if mac_array_c2 make the MAC Mult, probably has to do with multiple kernel simulations.
+	static MidType last = MidType_ZERO, temp = MidType_ZERO; // for some reason i can't call a function, and data isn't persistent if mac_array_c2 make the MAC Mult, probably has to do with multiple kernel simulations.
 
 	for (int t = 0; t < c * k; ++t)
 	    {
@@ -806,9 +807,6 @@ int main()
 		    }
 		}
 	    }
-
-
-
 
 	// shift pixels left in a loop until i finishes the lenght indexed thrimg.
 	std::cout << std::endl << "BLOCK" << thrimg
@@ -830,10 +828,11 @@ int main()
 
 		}
 	    }
-	else {
+	else
+	    {
 	    std::cout << std::endl << "BLOCK" << thrimg
-	    			    << " Last window doesn't shift----------------------------------"
-	    			    << std::endl;
+		    << " Last window doesn't shift----------------------------------"
+		    << std::endl;
 	    }
 
 	}
@@ -842,8 +841,6 @@ int main()
 	    << std::endl;
 
     outb.window_print();
-
-
 
     /*
 
