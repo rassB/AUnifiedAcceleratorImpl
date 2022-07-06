@@ -761,6 +761,7 @@ int main()
     ImgType B[c][h][l]; // use dummy array for testing. Replace with IMG.
     fillinputs_c(B);
 
+
     static xf::cv::Window<m, c * k, KerType> weightBuffer[k];
     kernel_mapping_c2(initial_kernell, weightBuffer);
 
@@ -768,7 +769,7 @@ int main()
     mapwindow_c2(B, featureBuffer);
 
     static xf::cv::Window<m, l, MidType> outb; // TODO: Data not persisting across function calls ?
-						   //SOLVED: Have to use "static Variables" https://docs.xilinx.com/r/en-US/ug1399-vitis-hls/Unrolling-Loops-to-Improve-Pipelining
+						   //NOTSOLVED: Have to use "static Variables" https://docs.xilinx.com/r/en-US/ug1399-vitis-hls/Unrolling-Loops-to-Improve-Pipelining
 
     std::cout << std::endl
 	    << "---------------------------- START LAYER ----------------------------------"
@@ -777,9 +778,11 @@ int main()
     /*
      for (int nextLines = 0; nextLines < h; ++nextLines)
      {
-     // acquire new line. to be implemented/}*/
 
-    for (int thrimg = 0; thrimg < l / mc; ++thrimg)
+     // acquire new line. to be implemented/}
+      */
+
+    for (int thrimg = 0; thrimg < (l/mc+(((l%mc)>0)?1:0)); ++thrimg) // add one block and in case division is not round, implicit pixel replication policy induced by shifting.
 	{
 	std::cout << std::endl << "BLOCK" << thrimg
 		<< "------------------MAC CALCULATION----------------"
@@ -807,11 +810,11 @@ int main()
 
 
 
-	// shift pixels left into the image and refeed to mapper, in a loop until i finishes the lenght
+	// shift pixels left in a loop until i finishes the lenght indexed thrimg.
 	std::cout << std::endl << "BLOCK" << thrimg
 		<< " OUTPUT Shifting----------------------------------"
 		<< std::endl;
-	if (thrimg < (l / mc) - 1)
+	if (thrimg < (l / mc))
 	    {
 	    for (int shift = 0; shift < mc; ++shift)
 		{
@@ -839,6 +842,8 @@ int main()
 	    << std::endl;
 
     outb.window_print();
+
+
 
     /*
 
