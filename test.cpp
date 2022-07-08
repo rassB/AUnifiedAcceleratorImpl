@@ -381,49 +381,7 @@ void partial_matrix_mapping(ImgType initial_input[c][h][l],
 
     }
 
-void conv_layer(ImgType ibuf[c * k * k][mc + 2 * pad],
-	KerType kbuf[mr][c * k * k], MidType obuf[mr][mc])
-    {
 
-    /*
-
-
-     for (int nextLines = 0; nextLines < h; ++nextLines)
-     {
-     // acquire new line. to be implemented/
-
-     for (int thrimg = 0; thrimg < l/mc; ++thrimg)
-     {
-     std::cout << std::endl << "BLOCK"<< thrimg << "----------------------------------"<< std::endl;
-
-     mac_array_c2(weightBuffer, featureBuffer, outb);
-     outb.window_print();
-
-     // shift pixels left into the image and refeed to mapper, in a loop until i finishes the lenght
-     std::cout << std::endl << "BLOCK"<< thrimg << " OUTPUT Shifting----------------------------------"<< std::endl;
-
-     for (int shift = 0; shift < mc; ++shift)
-     {
-     outb.shift_pixels_right();
-
-     for (int itermem = 0; itermem < k; ++itermem)
-     {
-     std::cout << std::endl << "BLOCK"<< thrimg << " INPUT Shifting----------------------------------"<< std::endl;
-     featureBuffer[itermem].shift_pixels_left();
-     }
-
-     }
-     }
-     }
-     std::cout << std::endl <<" ----------------- LAST WINDOW-----------------"<< std::endl;*/
-
-    // Load Kernels
-    // Acquire Image element
-    // for a block
-    // map block
-    // convolve block
-    // store block
-    }
 
 /*
  void padding(ImgType initial_input[c][h][l])
@@ -574,6 +532,82 @@ void mapwindow_c2(ImgType B[c][h][l],
 	    << "---------------------------- END Mapped Feature ----------------------------------"
 	    << std::endl;
     }
+
+
+
+
+
+
+void conv_layer(xf::cv::Window<>,
+	KerType kbuf[mr][c * k * k], MidType obuf[mr][mc])
+    {
+
+
+
+    /*
+        std::cout << std::endl
+    	    << "---------------------------- START LAYER ----------------------------------"
+    	    << std::endl;
+
+         for (int nextLines = 0; nextLines < h; ++nextLines)
+         {
+
+         // acquire new line. to be implemented/
+    	 } */
+
+
+        for (int thrimg = 0; thrimg < (l / mc + (((l % mc) > 0) ? 1 : 0)); ++thrimg) // add one block and in case division is not round, implicit pixel replication policy induced by shifting.
+    	{
+    	std::cout << std::endl << "------------------BLOCK" << thrimg
+    		<< " Processing----------------"
+    		<< std::endl;
+
+    	    mac_array_c2(weightBuffer, featureBuffer, outb); // OutData exists
+    	     outb.window_print(); 	// passing by reference fixes the disappearing issue.
+
+
+
+    	// shift pixels left in a loop until i finishes the lenght indexed thrimg.
+    	std::cout << std::endl << "------------------BLOCK" << thrimg
+    		<< " OUTPUT Shifting----------------------------------"
+    		<< std::endl;
+    	if (thrimg < (l / mc))
+    	    {
+    	    for (int shift = 0; shift < mc; ++shift)
+    		{
+    		outb.shift_pixels_right();
+
+    		for (int itermem = 0; itermem < k; ++itermem)
+    		    {
+    		    std::cout << std::endl << "------------------BLOCK" << thrimg
+    			    << " INPUT Shifting----------------------------------"
+    			    << std::endl;
+    		    featureBuffer[itermem].shift_pixels_left();
+    		    }
+
+    		}
+    	    }
+    	else
+    	    {
+    	    std::cout << std::endl << "------------------BLOCK" << thrimg
+    		    << " Last window doesn't shift----------------------------------"
+    		    << std::endl;
+    	    }
+    	}
+
+        std::cout << std::endl << " ----------------- LAST WINDOW-----------------"
+    	    << std::endl;
+
+    // Load Kernels
+    // Acquire Image element
+    // for a block
+    // map block
+    // convolve block
+    // store block
+
+    }
+
+
 
 int main()
     {
@@ -760,6 +794,12 @@ int main()
 
     ImgType B[c][h][l]; // use dummy array for testing. Replace with IMG.
     fillinputs_c(B);
+
+
+
+
+
+
 
     static xf::cv::Window<m, c * k, KerType> weightBuffer[k];
     kernel_mapping_c2(initial_kernell, weightBuffer);
