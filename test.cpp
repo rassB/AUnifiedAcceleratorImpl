@@ -10,7 +10,6 @@
 #include "opencv2/opencv.hpp"
 #include <common/xf_structs.hpp>
 #include "imgproc/xf_channel_extract.hpp"
-
 #include <imgproc/xf_channel_combine.hpp>
 
 //#include <bitset>
@@ -504,10 +503,10 @@ void kernel_mapping_c2(KerType initial_kernel[m][c][k][k],
     }
 
 void mac_array_c2(xf::cv::Window<m, c * k, KerType> A[k],
-	xf::cv::Window<c * k, l, ImgType> B[k], xf::cv::Window<m, l, MidType> C)
+	xf::cv::Window<c * k, l, ImgType> B[k], xf::cv::Window<m, l, MidType> &C)
     {
     std::cout << std::endl
-	    << "---------------------------- Mult Happening ----------------------------------"
+	    << "---------------------------- MAC Calculation Start ----------------------------------"
 	    << std::endl;
 
     static MidType last = MidType_ZERO, temp = MidType_ZERO;
@@ -529,12 +528,11 @@ void mac_array_c2(xf::cv::Window<m, c * k, KerType> A[k],
 	}
 
     std::cout << std::endl
-	    << "---------------------------- Start MAC Output----------------------------------"
+	    << "---------------------------- MAC Output ----------------------------------"
 	    << std::endl;
     C.window_print();
-    std::cout << std::endl << C.getval(2, 2);
     std::cout << std::endl
-	    << "---------------------------- End MAC Output  ----------------------------------"
+	    << "---------------------------- MAC Output  ----------------------------------"
 	    << std::endl;
     }
 
@@ -772,44 +770,31 @@ int main()
     static xf::cv::Window<m, l, MidType> outb; // TODO: Data not persisting across function calls ?
 					       //NOTSOLVED: Have to use "static Variables" https://docs.xilinx.com/r/en-US/ug1399-vitis-hls/Unrolling-Loops-to-Improve-Pipelining
 
+/*
     std::cout << std::endl
 	    << "---------------------------- START LAYER ----------------------------------"
 	    << std::endl;
 
-    /*
      for (int nextLines = 0; nextLines < h; ++nextLines)
      {
 
-     // acquire new line. to be implemented/}
-     */
+     // acquire new line. to be implemented/
+	 } */
+
 
     for (int thrimg = 0; thrimg < (l / mc + (((l % mc) > 0) ? 1 : 0)); ++thrimg) // add one block and in case division is not round, implicit pixel replication policy induced by shifting.
 	{
-	std::cout << std::endl << "BLOCK" << thrimg
-		<< "------------------MAC CALCULATION----------------"
+	std::cout << std::endl << "------------------BLOCK" << thrimg
+		<< " Processing----------------"
 		<< std::endl;
 
-	static MidType last = MidType_ZERO, temp = MidType_ZERO; // for some reason i can't call a function, and data isn't persistent if mac_array_c2 make the MAC Mult, probably has to do with multiple kernel simulations.
+	    mac_array_c2(weightBuffer, featureBuffer, outb); // OutData exists
+	     outb.window_print(); 	// passing by reference fixes the disappearing issue.
 
-	for (int t = 0; t < c * k; ++t)
-	    {
-	    for (int copy = 0; copy < k; ++copy)
-		{
-		for (int i = 0; i < mr; ++i)
-		    {
-		    for (int j = 0; j < mc; ++j)
-			{
-			last = (t == 0) ? MidType_ZERO : outb.getval(i, j);
-			temp = weightBuffer[copy].getval(i, t)
-				* featureBuffer[copy].getval(t, j);
-			outb.insert(last + temp, i, j);
-			}
-		    }
-		}
-	    }
+
 
 	// shift pixels left in a loop until i finishes the lenght indexed thrimg.
-	std::cout << std::endl << "BLOCK" << thrimg
+	std::cout << std::endl << "------------------BLOCK" << thrimg
 		<< " OUTPUT Shifting----------------------------------"
 		<< std::endl;
 	if (thrimg < (l / mc))
@@ -820,7 +805,7 @@ int main()
 
 		for (int itermem = 0; itermem < k; ++itermem)
 		    {
-		    std::cout << std::endl << "BLOCK" << thrimg
+		    std::cout << std::endl << "------------------BLOCK" << thrimg
 			    << " INPUT Shifting----------------------------------"
 			    << std::endl;
 		    featureBuffer[itermem].shift_pixels_left();
@@ -830,23 +815,22 @@ int main()
 	    }
 	else
 	    {
-	    std::cout << std::endl << "BLOCK" << thrimg
+	    std::cout << std::endl << "------------------BLOCK" << thrimg
 		    << " Last window doesn't shift----------------------------------"
 		    << std::endl;
 	    }
-
 	}
 
     std::cout << std::endl << " ----------------- LAST WINDOW-----------------"
 	    << std::endl;
 
-    outb.window_print();
+
+
 
     /*
 
 
-     mac_array_c2(weightBuffer, featureBuffer, outb); // OutData exists
-     outb.window_print(); 		// Outdata disappears
+
 
 
 
