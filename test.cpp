@@ -538,9 +538,19 @@ void mapwindow_c2(ImgType B[c][h][l],
 
 
 
-void conv_layer(xf::cv::Window<>,
-	KerType kbuf[mr][c * k * k], MidType obuf[mr][mc])
+void conv_layer(KerType initial_kernell[m][c][k][k],ImgType B[c][h][l])
     {
+
+
+
+    static xf::cv::Window<m, c * k, KerType> weightBuffer[k];
+    kernel_mapping_c2(initial_kernell, weightBuffer);
+
+    static xf::cv::Window<c * k, l, ImgType> featureBuffer[k];
+    mapwindow_c2(B, featureBuffer);
+
+    static xf::cv::Window<m, l, MidType> outb;   	// TODO: Data not persisting across function calls ? //SOLVED: Have to use "static Variables" and pass them by reference.https://docs.xilinx.com/r/en-US/ug1399-vitis-hls/Unrolling-Loops-to-Improve-Pipelining
+
 
 
 
@@ -791,93 +801,11 @@ int main()
     // Make Kernel, Make OutBuf, Mac Calc
     KerType initial_kernell[m][c][k][k];
     fillkernels_c(initial_kernell);
-
     ImgType B[c][h][l]; // use dummy array for testing. Replace with IMG.
     fillinputs_c(B);
+    MidType C[m][h*l];
 
-
-
-
-
-
-
-    static xf::cv::Window<m, c * k, KerType> weightBuffer[k];
-    kernel_mapping_c2(initial_kernell, weightBuffer);
-
-    static xf::cv::Window<c * k, l, ImgType> featureBuffer[k];
-    mapwindow_c2(B, featureBuffer);
-
-    static xf::cv::Window<m, l, MidType> outb; // TODO: Data not persisting across function calls ?
-					       //NOTSOLVED: Have to use "static Variables" https://docs.xilinx.com/r/en-US/ug1399-vitis-hls/Unrolling-Loops-to-Improve-Pipelining
-
-/*
-    std::cout << std::endl
-	    << "---------------------------- START LAYER ----------------------------------"
-	    << std::endl;
-
-     for (int nextLines = 0; nextLines < h; ++nextLines)
-     {
-
-     // acquire new line. to be implemented/
-	 } */
-
-
-    for (int thrimg = 0; thrimg < (l / mc + (((l % mc) > 0) ? 1 : 0)); ++thrimg) // add one block and in case division is not round, implicit pixel replication policy induced by shifting.
-	{
-	std::cout << std::endl << "------------------BLOCK" << thrimg
-		<< " Processing----------------"
-		<< std::endl;
-
-	    mac_array_c2(weightBuffer, featureBuffer, outb); // OutData exists
-	     outb.window_print(); 	// passing by reference fixes the disappearing issue.
-
-
-
-	// shift pixels left in a loop until i finishes the lenght indexed thrimg.
-	std::cout << std::endl << "------------------BLOCK" << thrimg
-		<< " OUTPUT Shifting----------------------------------"
-		<< std::endl;
-	if (thrimg < (l / mc))
-	    {
-	    for (int shift = 0; shift < mc; ++shift)
-		{
-		outb.shift_pixels_right();
-
-		for (int itermem = 0; itermem < k; ++itermem)
-		    {
-		    std::cout << std::endl << "------------------BLOCK" << thrimg
-			    << " INPUT Shifting----------------------------------"
-			    << std::endl;
-		    featureBuffer[itermem].shift_pixels_left();
-		    }
-
-		}
-	    }
-	else
-	    {
-	    std::cout << std::endl << "------------------BLOCK" << thrimg
-		    << " Last window doesn't shift----------------------------------"
-		    << std::endl;
-	    }
-	}
-
-    std::cout << std::endl << " ----------------- LAST WINDOW-----------------"
-	    << std::endl;
-
-
-
-
-    /*
-
-
-
-
-
-
-
-
-
-     */
+    conv_layer(initial_kernell,B);
 
 // Output Reshaping into Image for demonstration.
 // Accumulate two layers

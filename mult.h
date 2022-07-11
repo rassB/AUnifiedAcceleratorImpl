@@ -101,7 +101,6 @@ void padding();
 void mapwindow_c2(ImgType B[c][h][l],xf::cv::Window<c*k,l,ImgType> featureBuffer);
 void mapwindow_c2(ImgType B[c][h][l],xf::cv::Window<c*k,l,ImgType> featureBuffer[k]);*/
 
-void conv_layer(ImgType ibuf[c*k*k][mc+2*pad], KerType kbuf[mr][c*k*k],MidType obuf[mr][mc]);
 void bnorm_layer();
 void activation_layer();
 
