@@ -538,7 +538,7 @@ void mapwindow_c2(ImgType B[c][h][l],
 
 
 
-void conv_layer(KerType initial_kernell[m][c][k][k],ImgType B[c][h][l])
+void conv_layer(KerType initial_kernell[m][c][k][k], ImgType B[c][h][l], MidType C[m][h*l])
     {
 
 
@@ -805,7 +805,7 @@ int main()
     fillinputs_c(B);
     MidType C[m][h*l];
 
-    conv_layer(initial_kernell,B);
+    conv_layer(initial_kernell,B,C);
 
 // Output Reshaping into Image for demonstration.
 // Accumulate two layers
