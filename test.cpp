@@ -480,6 +480,10 @@ void mac_array_c2(xf::cv::Window<m, c * k, KerType> A[k],
 		    last = (t == 0) ? MidType_ZERO : C.getval(i, j);
 		    temp = A[copy].getval(i, t) * B[copy].getval(t, j);
 		    C.insert(last + temp, i, j);
+			std::cout << "Element C[" << i << "," << j << "]= A[" << i
+				<< "," << t << "](" << A[copy].getval(i, t) << ")*B[" << t << ","
+				<< j << "](" << B[copy].getval(t, j) << ")+ oldC[" << i << "," << j
+				<< "]" << last << "= " << C.getval(i, j) << std::endl;
 		    }
 		}
 	    }
